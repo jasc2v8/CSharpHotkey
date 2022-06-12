@@ -2,11 +2,12 @@
 AutoHotkey limited functions for C#
 
 ## OVERVIEW
-- CSharpHotkey implements many of the AutoHotkey_L_v1 automation functions in C# .NET code
+CSharpHotkey is:
+- Implements many of the AutoHotkey_L_v1 automation functions in C# .NET code
 - The user's C# .NET code provides all the flow, gui, structure, and work.
-- CSharpHotkey provides many of the Pinvoke Win32 native functions as AHK_L_v1 Win functions.
-- CSharpHotkey uses many C# features that enhance AHK (examples: Color, Keys, Point, Rectangle).
-- CSharpHotkey is a single C# class compiled with the user's exe.
+- Provides many of the Pinvoke Win32 native functions as AHK_L_v1 Win functions.
+- Uses many C# features that enhance AHK (examples: Color, Keys, Point, Rectangle).
+- A single C# class compiled with the user's exe.
 
 CSharpHotkey is NOT:
 - A complete implementation or replacement of AHK_L_v1
