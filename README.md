@@ -1,7 +1,7 @@
 # CSharpHotkey
 AutoHotkey limited functions for C#
 
-## OVERVIEW
+## Overview
 
 CSharpHotkey is:
 - Implements many of the AutoHotkey_L_v1 automation functions in C# .NET code.
@@ -15,7 +15,7 @@ CSharpHotkey is NOT:
 - Cannot load or execute .ahk scripts.
 - No plans to update for AHK_L_v2.
 
-## DIFFERENCES
+## Differences
 **WinTitle:** Most modern desktop and web apps don't use controls anymore,  
 therefore there is no need to match class name nor text in controls.  
 We can still use the WinTitle for basic Hotkey automation.
@@ -26,11 +26,16 @@ We can still use the WinTitle for basic Hotkey automation.
 
 **Unimplemented:** Functions implemented with C# .NET code: File, I/O, flow, Group, Obj, Send, Sounds, String, etc. Windows Control functions not implemented because modern desktop and web apps don't use controls.
 
-## BUILD TOOLS
-- Visual Studio 2022 with .NET Framework 3.5 (for compatability).
+## Build Tools
+- Visual Studio 2022 with .NET Framework 3.5 (for compatibility).
 - Can easily be converted to other Visual Studio, .NET Core, and .NET Framework versions.
 - Can easily be converted a static class if preferred (remove Constructor and change methods to static).
 
-## CREDITS
+## Credits
 - ImageSearch: See ImageSearch() in CSharpHotkey.cs
 - Everything else: The many contributors to StackOverflow, CodeProject, MSDN, and many others.
+
+## Objectives
+- This is a continuation of my COVID-19 pandemic projects to pass the time until the world gets back to work and it's safe to socialize once again.
+- I've always wanted to learn C# .NET programming.  With Visual Studio 2022 it was a much easier process than I anticipated.
+
