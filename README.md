@@ -34,11 +34,21 @@ CSharpHotkey is NOT:
 - Everything else: The many contributors to StackOverflow, CodeProject, MSDN, and many others.
 
 ## Objectives
-This is a continuation of my COVID-19 pandemic projects to pass the time until the world gets back to work and it's safe to socialize once again.  
-I started with AHKEZ, had fun and learned a lot, then needed another project.  
-Since my work is fully on Microsoft Windows, and all my PCs and server are on Microsoft Windows, I decided it was time to learn C programming.  
+This is a continuation of my COVID-19 pandemic projects to pass the time until the world gets back to work and it's safe to socialize once again.
+
+My hobbyist programming background is Basic, AutoIT, Free Pascal, AutoHotkey as well as Microsoft Excel macros.  I was always curios about C programming but never made the plunge to learn it.
+
+For my first project, I started with [AHKEZ](https://github.com/jasc2v8/AHKEZ). It was fun and I learned a lot, then needed another project.
+
+Since my work is fully on Microsoft Windows, and all my PCs and server are on Microsoft Windows, I decided it was time to learn C programming.
+
 I downloaded Visual Studio 2022 and was amazed how mature this product it. There was a bit of a learning curve but I found my "dream" IDE.
+
 I've always wanted to learn C so I started with C, which I learned is best suited for low-level applications and not my area of interest.
+
 Then I switched to C++, which was great but annoying when calling Win32 native functions.  I can't believe how random and non-standard the Microsfot Win32 calling conventions are.  Again not my area of interest.
-Finally, I switched to C# .NET programming, and found my "dream" language. C# .NET on VS2022 is my recommendation for any hobbyist programming on Windows (it's also cross-platform now if you are interested).
+
+Finally, I switched to C# .NET programming, and found my "dream" language.
+
+C# .NET on VS2022 is my recommendation for any hobbyist programming on Windows (it's also cross-platform now if you are interested).
 
