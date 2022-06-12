@@ -16,7 +16,7 @@ CSharpHotkey is NOT:
 - No plans to update for AHK_L_v2.
 
 ## Differences
-**WinTitle:** Most modern desktop and web apps don't use controls anymore, therefore there is no need to match class name nor text in controls. We can still use the WinTitle and ImageSearch find and activate buttons and links for basic Hotkey automation.
+**WinTitle:** Most modern desktop and web apps don't use controls anymore, therefore there is no need to match class name nor text in controls. We can still use the WinTitle and ImageSearch find and activate button images and links for basic Hotkey automation.
 
 **HotKey:** Class to register hot keys.
 
