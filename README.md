@@ -25,6 +25,7 @@ CSharpHotkey is NOT:
 **Unimplemented:** Windows Control functions not implemented because modern desktop and web apps don't use controls. Use C# .NET code to implement: File, I/O, flow, Group, Obj, Send, Sounds, String, etc. 
 
 ## Build Tools
+- I7 CPU @3.3GHZ (6 cores) with 16GB memory.
 - Visual Studio 2022 with .NET Framework 3.5 (for compatibility).
 - Can easily be converted to other Visual Studio, .NET Core, and .NET Framework versions.
 - Can easily be converted a static class if preferred (remove Constructor and change methods to static).
