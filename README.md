@@ -1,3 +1,10 @@
+![GitHub](https://img.shields.io/github/license/jasc2v8/CSharpHotkey)
+![Environment](https://img.shields.io/badge/Windows-XP,%20Vista,%207,%208,%2010-brightgreen.svg)
+![GitHub forks](https://img.shields.io/github/forks/jasc2v8/CSharpHotkey)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-red.svg)](https://www.paypal.me/JimDreherHome)
+
+<img src="resources/csharp-keycap-transparent-128.png"> 
+
 # CSharpHotkey
 AutoHotkey limited functions for C#
 
