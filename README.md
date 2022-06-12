@@ -49,7 +49,7 @@ I've always wanted to learn C so I started with it and learned that it's best su
 
 Then I switched to C++, which was great but annoying when calling Win32 native functions.  I can't believe how random and non-standard the Microsoft Win32 calling conventions are! How many data and pointer types are enough?  Again not my area of interest.
 
-Finally, I switched to C# .NET programming, and found my "dream" language.  I never realized that this is a high level language and relatively easy to understand.
+Finally, I switched to C# .NET programming, and found my "dream" language.  I never realized that this is a high level language and relatively easy to understand. I'm very happy that I chose C# .NET to create this CSharpHotkey library!
 
 I HIGHLY recommend C# .NET on VS2022 for any hobbyist programming on Windows (it's also cross-platform now if you are interested).
 
