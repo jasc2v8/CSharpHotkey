@@ -22,7 +22,7 @@ CSharpHotkey is NOT:
 
 **InputHook:** Class to register global keyboard and mouse hooks.
 
-**Unimplemented:** Functions implemented with C# .NET code: File, I/O, flow, Group, Obj, Send, Sounds, String, etc. Windows Control functions not implemented because modern desktop and web apps don't use controls.
+**Unimplemented:** Windows Control functions not implemented because modern desktop and web apps don't use controls. Use C# .NET code to implement: File, I/O, flow, Group, Obj, Send, Sounds, String, etc. 
 
 ## Build Tools
 - Visual Studio 2022 with .NET Framework 3.5 (for compatibility).
