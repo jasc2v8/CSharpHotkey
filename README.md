@@ -3,7 +3,7 @@
 ![GitHub forks](https://img.shields.io/github/forks/jasc2v8/CSharpHotkey)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-red.svg)](https://www.paypal.me/JimDreherHome)
 
-<img src="resources/csharphotkey-keycap-transparent-128.png"> 
+<img src="Resources/CSharpHotkey-keycap-transparent-128.png"> 
 
 # CSharpHotkey
 AutoHotkey limited functions for C#
