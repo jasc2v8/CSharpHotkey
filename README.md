@@ -34,11 +34,11 @@ CSharpHotkey is NOT:
 - Everything else: The many contributors to StackOverflow, CodeProject, MSDN, and many others.
 
 ## Objectives
-This is a continuation of my COVID-19 pandemic projects to pass the time until the world gets back to work and it's safe to socialize once again.
+This is a continuation of my COVID-19 Pandemic projects to pass the time until the world gets back to work and it's safe to socialize once again.
 
 My hobbyist programming background is Visual Basic, AutoIT, Free Pascal, and AutoHotkey as well as Microsoft Excel macros.  I was always curios about C programming but never made the plunge to learn it.
 
-For my first project, I started with [AHKEZ](https://github.com/jasc2v8/AHKEZ). It was fun and I learned a lot, then needed another project.
+For my first Pandemic project, I started with [AHKEZ](https://github.com/jasc2v8/AHKEZ). It was fun and I learned a lot, then needed another project.
 
 Since my work is fully on Microsoft Windows, and all my PCs and server are on Microsoft Windows, I decided it was time to learn C programming.
 
