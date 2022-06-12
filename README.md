@@ -23,10 +23,10 @@ InputHook: Class to register global keyboard and mouse hooks
 Unimplemented: Functions implemented with C# .NET code: File, I/O, flow, Group, Obj, Send, Sounds, String, etc. Windows Control functions not implemented because modern desktop and web apps don't use controls
 
 ## BUILD TOOLS
-Visual Studio 2022 with .NET Framework 3.5 (for compatability)
-Can easily be converted to other Visual Studio, .NET Core, and .NET Framework versions.
-Can easily be converted a static class if preferred (remove Constructor and change methods to static).
+- Visual Studio 2022 with .NET Framework 3.5 (for compatability)
+- Can easily be converted to other Visual Studio, .NET Core, and .NET Framework versions.
+- Can easily be converted a static class if preferred (remove Constructor and change methods to static).
 
 ## CREDITS
-ImageSearch:        See ImageSearch()
-Everything Else:    The many contributors to StackOverflow, CodeProject, MSDN, and many others.
+- ImageSearch: See ImageSearch() in CSharpHotkey.cs
+- Everything else: The many contributors to StackOverflow, CodeProject, MSDN, and many others.
