@@ -44,11 +44,11 @@ Since my work is fully on Microsoft Windows, and all my PCs and server are on Mi
 
 I downloaded Visual Studio 2022 and was amazed how mature this product it. There was a bit of a learning curve but I found my "dream" IDE.
 
-I've always wanted to learn C so I started with C, which I learned is best suited for low-level applications and not my area of interest.
+I've always wanted to learn C so I started with it and learned that it's best suited for low-level applications and not my area of interest.
 
-Then I switched to C++, which was great but annoying when calling Win32 native functions.  I can't believe how random and non-standard the Microsfot Win32 calling conventions are.  Again not my area of interest.
+Then I switched to C++, which was great but annoying when calling Win32 native functions.  I can't believe how random and non-standard the Microsoft Win32 calling conventions are! How many data and pointer types are enough?  Again not my area of interest.
 
-Finally, I switched to C# .NET programming, and found my "dream" language.
+Finally, I switched to C# .NET programming, and found my "dream" language.  I never realized that this is a high level language and relatively easy to understand.
 
-C# .NET on VS2022 is my recommendation for any hobbyist programming on Windows (it's also cross-platform now if you are interested).
+I HIGHLY recommend C# .NET on VS2022 for any hobbyist programming on Windows (it's also cross-platform now if you are interested).
 
