@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TEST_CSharpHotkey", "TEST_CSharpHotkey\TEST_CSharpHotkey.csproj", "{146773C5-8855-45DE-B1AB-569C4AAD7F77}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_SendKey", "Test_SendKey\Test_SendKey.csproj", "{146773C5-8855-45DE-B1AB-569C4AAD7F77}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
