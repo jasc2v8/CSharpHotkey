@@ -1,13 +1,5 @@
 ﻿/* 
     2022-06-14-1355 v1.0.1 
-    2022-06-14-1355 add KeyDelay to Send
-    2022-06-14-0925 add WinTitle = "" on Wait and other functions
-    2022-06-13-1515 add BlockInput, fix icon in InputBox
-    2022-06-13-0930 fix Send
-    2022-06-12-1845 fix Activate
-    2022-06-12-1820 fix SetLockState
-    2022-06-12-1545 fix RECT in GetPos
-    2022-06-12-0950 Initial commit to Github
     
     TODO:
       continue testing and development
