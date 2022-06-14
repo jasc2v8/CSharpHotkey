@@ -33,7 +33,7 @@ CSharpHotkey is NOT:
 
 ## Demo
 
-<img src="resources/DEMO_CSharpHotkey_v1.0.1_640.png"> 
+<img src="resources/DEMO_CSharpHotkey_640.png"> 
 
 ## Build Tools
 - I7 CPU @3.3GHZ (6 cores) with 16GB memory.
