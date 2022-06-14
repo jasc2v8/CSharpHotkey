@@ -1,5 +1,5 @@
 ﻿/* 
-    2022-06-14-1355 v1.0.1 
+    2022-06-14-1620 v1.0.2 
     
     TODO:
       continue testing and development
@@ -189,7 +189,7 @@ namespace CSharpHotkeyLib
             TitleMatchModeCase = MATCH_MODE.Exact;
             TitleMatchModeCase = MATCH_CASE.Sensitive;
 
-            KeyDelay = 0;
+            KeyDelay = 10;
             MouseDelay = 10;
             WinDelay = 100;
 
@@ -1311,6 +1311,26 @@ namespace CSharpHotkeyLib
             //      <add key = "SendKeys" value= "SendInput"/>
             //  </appSettings>
 
+            //TEST_Send
+            //
+            //very limited testing, Send:
+            //  stopWatch = 0ms
+            //  Win.SetKeyDelay(0):   Send("0") =  31-56ms  =  59 ms
+            //  Win.SetKeyDelay():    Send("0") =  47-78ms  =  80 ms (default=10);
+            //  Win.SetKeyDelay(25):  Send("0") =  63-79ms  = 102 ms 
+            //  Win.SetKeyDelay(50):  Send("0") =  95-110ms = 150 ms 
+            //  Win.SetKeyDelay(75):  Send("0") = 109-140ms = 179 ms
+            //  Win.SetKeyDelay(100): Send("0") = 142-170ms = 156 ms
+
+            //very limited testing, SendInput:
+            //  stopWatch = 0ms
+            //  Win.SetKeyDelay(0):   Send("0") =  31-44  =  53 ms
+            //  Win.SetKeyDelay():    Send("0") =  47-61  =  54 ms (default=10);
+            //  Win.SetKeyDelay(25):  Send("0") =  61-63  =  92 ms
+            //  Win.SetKeyDelay(50):  Send("0") =  94-95  =  94 ms
+            //  Win.SetKeyDelay(75):  Send("0") = 110-127 = 118 ms 
+            //  Win.SetKeyDelay(100): Send("0") = 140-157 = 148 ms
+
             string _DoSend(string Buffer)
             {
                 try
@@ -1521,9 +1541,9 @@ namespace CSharpHotkeyLib
                     break;
             }
         }
-        public void SetKeyDelay(int milliSeconds = 100)
+        public void SetKeyDelay(int milliSeconds = 10)
         {
-            //Time in milliSeconds: -1 for no delay, 0 for the smallest possible delay, 100 is the default.
+            //Time in milliSeconds: -1 for no delay, 0 for the smallest possible delay, 10 is the default.
 
             KeyDelay = milliSeconds;
         }
