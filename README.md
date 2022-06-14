@@ -3,7 +3,7 @@
 ![GitHub forks](https://img.shields.io/github/forks/jasc2v8/CSharpHotkey)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-red.svg)](https://www.paypal.me/JimDreherHome)
 
-<img src="resources/DEMO_CSharpHotkey_v1.0.1_640.png"> 
+<img src="resources/CSharpHotkey-64.png"> 
 
 # CSharpHotkey
 AutoHotkey limited functions for C#
@@ -33,7 +33,7 @@ CSharpHotkey is NOT:
 
 ## Demo
 
-<img src="resources/DEMO_CSharpHotkey_screen.png"> 
+<img src="resources/DEMO_CSharpHotkey_v1.0.1_640.png"> 
 
 ## Build Tools
 - I7 CPU @3.3GHZ (6 cores) with 16GB memory.
