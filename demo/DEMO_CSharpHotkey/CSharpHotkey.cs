@@ -1,6 +1,19 @@
 ﻿/* 
-  v1.0.0   Initial commit to Github
-  README at https://github.com/jasc2v8/CSharpHotkey
+    2022-06-14-1355 v1.0.1 
+    2022-06-14-1355 add KeyDelay to Send
+    2022-06-14-0925 add WinTitle = "" on Wait and other functions
+    2022-06-13-1515 add BlockInput, fix icon in InputBox
+    2022-06-13-0930 fix Send
+    2022-06-12-1845 fix Activate
+    2022-06-12-1820 fix SetLockState
+    2022-06-12-1545 fix RECT in GetPos
+    2022-06-12-0950 Initial commit to Github
+    
+    TODO:
+      continue testing and development
+        
+    OVERVIEW:
+      README at https://github.com/jasc2v8/CSharpHotkey
 */
 
 using System;
@@ -1291,19 +1304,108 @@ namespace CSharpHotkeyLib
         }
         public void Send(string KeyStrokes, bool SendWait = true)
         {
-            // See https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.sendkeys
+            // https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.sendkeys
             // + = Shift, ^ = Control, % = Alt
             // ^a = Ctrl then A, ^%(a) = Ctrl+Alt+A, 
             // Hold down SHIFT while E and C are pressed, use "+(EC)"
             // Hold down SHIFT while E is pressed, followed by C without SHIFT, use "+EC".
             // Literals must be escaped within curly braces: + ^ % ~ { } [ ], example: {^} = ^
+            // Many apps require lower case modifer keys: "^a" versus "^A"
+            // Therefore all modifer keys are changed to lower case
+            //
+            // If your app relies on consistent behavior regardless of the versions of Windows and and options,
+            //  you can force the SendKeys class to use the new implementation by adding the following to app.config:
+            //  <appSettings>
+            //      <add key = "SendKeys" value= "SendInput"/>
+            //  </appSettings>
 
-            if (SendWait)
-                SendKeys.SendWait(KeyStrokes);
-            else
-                SendKeys.Send(KeyStrokes);
+            string _DoSend(string Buffer)
+            {
+                try
+                {
+                    if (SendWait)
+                        SendKeys.SendWait(Buffer);
+                    else
+                        SendKeys.Send(Buffer);
+                }
+                catch
+                {
+                    if (SendWait)
+                        SendKeys.SendWait("?");
+                    else
+                        SendKeys.Send("?");
+                }
+                if (!SendWait)
+                    SendKeys.Flush();
 
-            DoDelay(KeyDelay); //doesn't delay for each key stroke, delay is after all keystrokes
+                DoDelay(KeyDelay);
+                return String.Empty;
+            }
+
+            bool modChar = false;
+            bool openParen = false;
+            bool openBrace = false;
+            string wordBuffer = String.Empty;
+
+            foreach (char c in KeyStrokes)
+            {
+                if ("+^&".Contains(c.ToString()))
+                {
+                    modChar = true;
+                    wordBuffer += c;
+                    continue;
+                }
+                else if (c == ')')
+                {
+                    openParen = false;
+                    modChar = false;
+                    wordBuffer = _DoSend(wordBuffer += c);
+                    continue;
+
+                }
+                else if (c == '}')
+                {
+                    openBrace = false;
+                    modChar = false;
+
+                    if (wordBuffer.EndsWith("{"))
+                    {
+                        openBrace = false;
+                        wordBuffer += '}';
+                        continue;
+                    }
+
+                    wordBuffer = _DoSend(wordBuffer += char.ToLower(c));
+                    continue;
+                }
+                else if (openParen == true | openBrace == true)
+                {
+                    wordBuffer += char.ToLower(c);
+                    continue;
+                }
+                else if (c == '(' & modChar == true)
+                {
+                    openParen = true;
+                    wordBuffer += c;
+                    continue;
+                }
+                else if (c == '{')
+                {
+                    openBrace = true;
+                    wordBuffer += c;
+                    continue;
+                }
+                else if (modChar == true) //[and if !(+^%) tested above]
+                {
+                    modChar = false;
+                    wordBuffer = _DoSend(wordBuffer += char.ToLower(c));
+                    continue;
+                }
+                else
+                {
+                    wordBuffer = _DoSend(wordBuffer += c);
+                }
+            }
         }
         public bool Set(int SET_PARAM, string WinTitle = "")
         {
@@ -1478,7 +1580,7 @@ namespace CSharpHotkeyLib
 
             return o;
         }
-        public bool Wait(string WinTitle, double TimeoutSeconds = -1)
+        public bool Wait(string WinTitle = "", double TimeoutSeconds = -1)
         {
             //TimeoutSeconds: How many seconds to wait before timing out
             //Omit or -1:   wait indefinitely
@@ -1498,7 +1600,7 @@ namespace CSharpHotkeyLib
             }
             return true; //timeout
         }
-        public bool WaitActive(string WinTitle, double TimeoutSeconds = -1)
+        public bool WaitActive(string WinTitle = "", double TimeoutSeconds = -1)
         {
             //TimeoutSeconds: How many seconds to wait before timing out
             //Omit or -1:   wait indefinitely
@@ -1518,7 +1620,7 @@ namespace CSharpHotkeyLib
             }
             return true; //timeout
         }
-        public bool WaitNotActive(string WinTitle, double TimeoutSeconds = -1)
+        public bool WaitNotActive(string WinTitle = "", double TimeoutSeconds = -1)
         {
             //TimeoutSeconds: How many seconds to wait before timing out
             //Omit or -1:   wait indefinitely
@@ -1538,7 +1640,7 @@ namespace CSharpHotkeyLib
             }
             return true; //timeout
         }
-        public bool WaitClose(string WinTitle, double TimeoutSeconds = -1)
+        public bool WaitClose(string WinTitle = "", double TimeoutSeconds = -1)
         {
             //TimeoutSeconds: How many seconds to wait before timing out
             //Omit or -1:   wait indefinitely

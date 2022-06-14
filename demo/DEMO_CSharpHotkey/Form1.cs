@@ -1162,6 +1162,69 @@ namespace DEMO_CSharpHotkey
 
             WriteLine("Test complete.");
         }
+        public void DEMO_Send()
+        {
+
+            void _DoSend(int delay)
+            {
+                Win.SetKeyDelay(delay);
+                Win.Send("This is a test with key delay = " + delay.ToString() + "{ENTER}");
+            }
+            WriteLine("DEMO Send starting...");
+
+            textBoxOutput.Focus();
+
+            //_DoSend(0);
+            //_DoSend(100);
+
+            //Win.SetLockState(Keys.Capital, Keys.Up);
+
+            string WinTitle = "wordpad"; // textBoxTitle.Text;
+
+           if (!Win.Exist(WinTitle))
+              Process.Start(WinTitle);
+
+            Win.Activate(WinTitle);
+            Win.WaitActive();
+
+            Win.Sleep(250);
+
+            //Win.Send("{TAB}Starting...{ENTER}");
+
+            //delete any existing text
+            Win.SetKeyDelay(0);
+            Win.Send("^aStarting DEMO - ^uPLEASE don't touch keyboard or mouse!^u{ENTER}");
+            Win.Send("Changing Font Size...{ENTER}");
+            //Win.Send("^bbold, ^iitalic, ^uunderline...{enter}");
+
+            //change font size slowly so user can see the changes
+            Win.SetKeyDelay(500);
+            Win.Send("%HS1^C26{ENTER}");
+
+            Win.SetKeyDelay(0);
+            Win.Send("Font size changed to 26.{ENTER}");
+            Win.Sleep(500);
+
+            //restore font size slowly
+            Win.Send("Restoring Font size....{ENTER}");
+            Win.SetKeyDelay(500);
+            Win.Send("%HS1^v{ENTER}");  //wordpad
+
+            //send every possible combination
+            Win.SetKeyDelay(0);
+            Win.Send("Sending all possible combinations........{bs 5}{enter}");
+            Win.Send("CapsLock state: " + Control.IsKeyLocked(Keys.CapsLock) + "~"); //tilde same as {ENTER}
+            Win.Send("^(biu)PASSword, {+}{^}{%} {{} {}} {[} {]} {h 10}, +(ec), +ec^(biu){enter}");
+            Win.Send("DEMO complete.~");
+            Win.Sleep(1000);
+            
+            Win.Minimize(WinTitle);
+
+            Win.SetKeyDelay();
+
+            WriteLine("DEMO Send complete.");
+
+        }
         public void DEMO_Set()
         {
             string WinTitle = "notepad"; // textBoxTitle.Text;
