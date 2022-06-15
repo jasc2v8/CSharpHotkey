@@ -1,11 +1,5 @@
 ﻿/* 
- 
-    2022-06-13-1515   add BlockInput, fix icon in InputBox
-    2022-06-13-0930   fix Send
-    2022-06-12-1845   fix Activate
-    2022-06-12-1820   fix SetLockState
-    2022-06-12-1545   fix RECT in GetPos
-    2022-06-12-0950   Initial commit to Github
+    2022-06-14-1620 v1.0.2 
     
     TODO:
       continue testing and development
@@ -195,7 +189,7 @@ namespace CSharpHotkeyLib
             TitleMatchModeCase = MATCH_MODE.Exact;
             TitleMatchModeCase = MATCH_CASE.Sensitive;
 
-            KeyDelay = 0;
+            KeyDelay = 10;
             MouseDelay = 10;
             WinDelay = 100;
 
@@ -1302,19 +1296,128 @@ namespace CSharpHotkeyLib
         }
         public void Send(string KeyStrokes, bool SendWait = true)
         {
-            // See https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.sendkeys
+            // https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.sendkeys
             // + = Shift, ^ = Control, % = Alt
             // ^a = Ctrl then A, ^%(a) = Ctrl+Alt+A, 
             // Hold down SHIFT while E and C are pressed, use "+(EC)"
             // Hold down SHIFT while E is pressed, followed by C without SHIFT, use "+EC".
             // Literals must be escaped within curly braces: + ^ % ~ { } [ ], example: {^} = ^
+            // Many apps require lower case modifer keys: "^a" versus "^A"
+            // Therefore all modifer keys are changed to lower case
+            //
+            // If your app relies on consistent behavior regardless of the versions of Windows and and options,
+            //  you can force the SendKeys class to use the new implementation by adding the following to app.config:
+            //  <appSettings>
+            //      <add key = "SendKeys" value= "SendInput"/>
+            //  </appSettings>
 
-            if (SendWait)
-                SendKeys.SendWait(KeyStrokes);
-            else
-                SendKeys.Send(KeyStrokes);
+            //TEST_Send
+            //
+            //very limited testing, Send:
+            //  stopWatch = 0ms
+            //  Win.SetKeyDelay(0):   Send("0") =  31-56ms  =  59 ms
+            //  Win.SetKeyDelay():    Send("0") =  47-78ms  =  80 ms (default=10);
+            //  Win.SetKeyDelay(25):  Send("0") =  63-79ms  = 102 ms 
+            //  Win.SetKeyDelay(50):  Send("0") =  95-110ms = 150 ms 
+            //  Win.SetKeyDelay(75):  Send("0") = 109-140ms = 179 ms
+            //  Win.SetKeyDelay(100): Send("0") = 142-170ms = 156 ms
 
-            DoDelay(KeyDelay); //doesn't delay for each key stroke, delay is after all keystrokes
+            //very limited testing, SendInput:
+            //  stopWatch = 0ms
+            //  Win.SetKeyDelay(0):   Send("0") =  31-44  =  53 ms
+            //  Win.SetKeyDelay():    Send("0") =  47-61  =  54 ms (default=10);
+            //  Win.SetKeyDelay(25):  Send("0") =  61-63  =  92 ms
+            //  Win.SetKeyDelay(50):  Send("0") =  94-95  =  94 ms
+            //  Win.SetKeyDelay(75):  Send("0") = 110-127 = 118 ms 
+            //  Win.SetKeyDelay(100): Send("0") = 140-157 = 148 ms
+
+            string _DoSend(string Buffer)
+            {
+                try
+                {
+                    if (SendWait)
+                        SendKeys.SendWait(Buffer);
+                    else
+                        SendKeys.Send(Buffer);
+                }
+                catch
+                {
+                    if (SendWait)
+                        SendKeys.SendWait("?");
+                    else
+                        SendKeys.Send("?");
+                }
+                if (!SendWait)
+                    SendKeys.Flush();
+
+                DoDelay(KeyDelay);
+                return String.Empty;
+            }
+
+            bool modChar = false;
+            bool openParen = false;
+            bool openBrace = false;
+            string wordBuffer = String.Empty;
+
+            foreach (char c in KeyStrokes)
+            {
+                if ("+^&".Contains(c.ToString()))
+                {
+                    modChar = true;
+                    wordBuffer += c;
+                    continue;
+                }
+                else if (c == ')')
+                {
+                    openParen = false;
+                    modChar = false;
+                    wordBuffer = _DoSend(wordBuffer += c);
+                    continue;
+
+                }
+                else if (c == '}')
+                {
+                    openBrace = false;
+                    modChar = false;
+
+                    if (wordBuffer.EndsWith("{"))
+                    {
+                        openBrace = false;
+                        wordBuffer += '}';
+                        continue;
+                    }
+
+                    wordBuffer = _DoSend(wordBuffer += char.ToLower(c));
+                    continue;
+                }
+                else if (openParen == true | openBrace == true)
+                {
+                    wordBuffer += char.ToLower(c);
+                    continue;
+                }
+                else if (c == '(' & modChar == true)
+                {
+                    openParen = true;
+                    wordBuffer += c;
+                    continue;
+                }
+                else if (c == '{')
+                {
+                    openBrace = true;
+                    wordBuffer += c;
+                    continue;
+                }
+                else if (modChar == true) //[and if !(+^%) tested above]
+                {
+                    modChar = false;
+                    wordBuffer = _DoSend(wordBuffer += char.ToLower(c));
+                    continue;
+                }
+                else
+                {
+                    wordBuffer = _DoSend(wordBuffer += c);
+                }
+            }
         }
         public bool Set(int SET_PARAM, string WinTitle = "")
         {
@@ -1438,9 +1541,9 @@ namespace CSharpHotkeyLib
                     break;
             }
         }
-        public void SetKeyDelay(int milliSeconds = 100)
+        public void SetKeyDelay(int milliSeconds = 10)
         {
-            //Time in milliSeconds: -1 for no delay, 0 for the smallest possible delay, 100 is the default.
+            //Time in milliSeconds: -1 for no delay, 0 for the smallest possible delay, 10 is the default.
 
             KeyDelay = milliSeconds;
         }
@@ -1489,7 +1592,7 @@ namespace CSharpHotkeyLib
 
             return o;
         }
-        public bool Wait(string WinTitle, double TimeoutSeconds = -1)
+        public bool Wait(string WinTitle = "", double TimeoutSeconds = -1)
         {
             //TimeoutSeconds: How many seconds to wait before timing out
             //Omit or -1:   wait indefinitely
@@ -1509,7 +1612,7 @@ namespace CSharpHotkeyLib
             }
             return true; //timeout
         }
-        public bool WaitActive(string WinTitle, double TimeoutSeconds = -1)
+        public bool WaitActive(string WinTitle = "", double TimeoutSeconds = -1)
         {
             //TimeoutSeconds: How many seconds to wait before timing out
             //Omit or -1:   wait indefinitely
@@ -1529,7 +1632,7 @@ namespace CSharpHotkeyLib
             }
             return true; //timeout
         }
-        public bool WaitNotActive(string WinTitle, double TimeoutSeconds = -1)
+        public bool WaitNotActive(string WinTitle = "", double TimeoutSeconds = -1)
         {
             //TimeoutSeconds: How many seconds to wait before timing out
             //Omit or -1:   wait indefinitely
@@ -1549,7 +1652,7 @@ namespace CSharpHotkeyLib
             }
             return true; //timeout
         }
-        public bool WaitClose(string WinTitle, double TimeoutSeconds = -1)
+        public bool WaitClose(string WinTitle = "", double TimeoutSeconds = -1)
         {
             //TimeoutSeconds: How many seconds to wait before timing out
             //Omit or -1:   wait indefinitely
