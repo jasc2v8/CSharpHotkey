@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>3.5</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="WindowsInput\**" />
+    <EmbeddedResource Remove="WindowsInput\**" />
+    <None Remove="WindowsInput\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="CSharpHotkey - Copy.cs" />
+    <Compile Remove="CSharpHotkeyEx.cs" />
+    <Compile Remove="CSharpHotkeyExInputSimulator.cs" />
+    <Compile Remove="CSharpHotkeyExPinvoke.cs" />
+    <Compile Remove="InputSimulator.cs" />
+    <Compile Remove="KeyboardMouseFunctions.cs" />
+    <Compile Remove="KeyboardMouseFunctionsStatic.cs" />
+    <Compile Remove="Util.Hotkey.cs" />
+    <Compile Remove="Util.KeyboardHook.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="taskkill /F /FI &quot;IMAGENAME eq $(TargetFileName)&quot;" />
+  </Target>
+
+</Project>
