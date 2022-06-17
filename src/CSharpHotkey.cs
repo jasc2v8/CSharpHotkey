@@ -1,4 +1,5 @@
 ﻿/* 
+    2022-06-17-0500 v1.0.3  Add Send(Keys.Key), fix SetLockState()
     2022-06-14-1620 v1.0.2 
     
     TODO:
@@ -1294,6 +1295,22 @@ namespace CSharpHotkeyLib
             DoDelay(WinDelay);
             return result1 | result2;
         }
+        public void Send(Keys Key, Keys UpDown = Keys.Down | Keys.Up)
+        {
+            if (UpDown == Keys.Down)
+            {
+                Win32.keybd_event((byte)Key, 0, Win32.KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+            }
+            else if (UpDown == Keys.Up)
+            {
+                Win32.keybd_event((byte)Key, 0, Win32.KEYEVENTF_KEYUP, UIntPtr.Zero);
+            }
+            else
+            {
+                Win32.keybd_event((byte)Key, 0, Win32.KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+                Win32.keybd_event((byte)Key, 0, Win32.KEYEVENTF_KEYUP, UIntPtr.Zero);
+            }
+        }
         public void Send(string KeyStrokes, bool SendWait = true)
         {
             // https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.sendkeys
@@ -1482,17 +1499,9 @@ namespace CSharpHotkeyLib
             if (State == Keys.Down && Control.IsKeyLocked(Key) || (State != Keys.Down && !Control.IsKeyLocked(Key)))
                 return;
 
-            uint MAPVK_VK_TO_VSC = 0;
-            uint scanCode = 0;
+            Send(Key);
 
-            scanCode = Win32.MapVirtualKey((uint)Key, MAPVK_VK_TO_VSC);
-
-            Win32.keybd_event((byte)Key, (byte)scanCode, Win32.KEYEVENTF_EXTENDEDKEY, (UIntPtr)0);
-            Win32.keybd_event((byte)Key, (byte)scanCode, Win32.KEYEVENTF_EXTENDEDKEY | Win32.KEYEVENTF_KEYUP, (UIntPtr)0);
-
-            bool reset_keyboard_state = Control.IsKeyLocked(Key);
-
-            DoDelay(KeyDelay);
+            DoDelay(100);
         }
         public bool SetTitle(string NewTitle, string WinTitle = "")
         {
@@ -1891,6 +1900,7 @@ namespace CSharpHotkeyLib
             #endregion
 
             #region KEYEVENT
+            public const int KEYEVENTF_KEYDOWN = 0; //custom
             public const int KEYEVENTF_EXTENDEDKEY = 0x0001;
             public const int KEYEVENTF_KEYUP = 0x0002;
             public const int KEYEVENTF_UNICODE = 0x0004;

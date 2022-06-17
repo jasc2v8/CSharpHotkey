@@ -112,7 +112,6 @@ namespace DEMO_CSharpHotkey
             {
                 WriteLine("ERROR ex =" + ex.Message);
             }
-
         }
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
