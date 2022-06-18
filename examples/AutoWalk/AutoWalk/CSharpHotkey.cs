@@ -1,4 +1,6 @@
 ﻿/*
+    2022-06-18-1430 v0.0.6  Add Sending.Key so Send() doesn't trigger InputHook() or HotKey()
+    2022-06-18-0630 v0.0.5  Remove reference to PresentationCore
     2022-06-17-1500 v0.0.4  Change Struct to Enum for function parameters
     2022-06-17-0500 v0.0.3  Add Send(Keys.Key), fix SetLockState()
     2022-06-14-1620 v0.0.2 
@@ -21,8 +23,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using System.Windows.Input; //Project, Add Reference, Assemblies, Search for "PresentationCore", Check to select, press OK.
-
 using Clipboard = System.Windows.Forms.Clipboard;
 using Cursor = System.Windows.Forms.Cursor;
 
@@ -52,6 +52,10 @@ namespace CSharpHotkeyLib
     {
         public Point Point;
         public IntPtr Handle;
+    }
+    public static class Sending
+    {
+        public static Keys Key;
     }
     #endregion Public Class Objects
 
@@ -93,15 +97,12 @@ namespace CSharpHotkeyLib
         InSensitive = 1,
         Sensitive = 2,
     }
-    public enum ModKeys
+    public enum MouseButton
     {
-        //Hotkey modifiers
-        None = 0x0000, //custom
-        Alt = 0x0001,
-        Control = 0x0002,
-        Shift = 0x0004,
-        Win = 0x0008,
-        ControlAlt = ModKeys.Control + ModKeys.Alt, //custom
+        //System.Windows.Input.MouseButton Enum
+        Left = 0,
+        Middle = 1,
+        Right = 2,
     }
     public enum PixelMode
     {
@@ -1286,6 +1287,8 @@ namespace CSharpHotkeyLib
             //https://github.com/search?q=InputSimulator+language%3AC%23&type=Repositories&ref=advsearch&l=C%23&l=
             //https://www.nuget.org/packages?q=InputSimulator
 
+            Sending.Key = Key; //signal InputHook() and HotKey() to ignore this Key
+
             if (UpDown == Keys.Down)
             {
                 Win32.keybd_event((byte)Key, 0, Win32.KEYEVENTF_KEYDOWN, UIntPtr.Zero);
@@ -1316,6 +1319,10 @@ namespace CSharpHotkeyLib
             //  <appSettings>
             //      <add key = "SendKeys" value= "SendInput"/>
             //  </appSettings>
+            //
+            // NOTE: This Send function WILL trigger InputHook() and HotKey().
+            //       Send(Keys Key) will NOT trigger InputHook() and HotKey().
+            //
 
             //TEST_Send
             //
@@ -2303,6 +2310,8 @@ namespace CSharpHotkeyLib
          * pressing that key will result in you getting your hotkey message rather than 
          * the app with focus getting the normal WM_KEYDOWN/WM_CHAR messages. 
          * You have effectively blocked other apps from seeing that key press.
+         * 
+         * Note: Send(Keys Key) will NOT trigger InputHook() or HotKey(), but Send(string Keystrokes) will.
          */
 
         private class Win32
@@ -2360,8 +2369,17 @@ namespace CSharpHotkeyLib
         }
         public bool PreFilterMessage(ref Message m)
         {
+            //trigger if registered hotkey
             if (m.Msg == WM_HOTKEY && (int)m.WParam == HotKeyID)
             {
+                //except ignore Sending.Key by Send()
+                int sendingKeyID = Sending.Key.GetHashCode() + Keys.None.GetHashCode();
+                if ((int)m.WParam == sendingKeyID)
+                {
+                    Sending.Key = Keys.None;
+                    return false;
+                }
+    
                 OnHotKeyAction();
             }
             return false;
@@ -2374,7 +2392,6 @@ namespace CSharpHotkeyLib
             //System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(new Action(() => HotKeyAction?.Invoke(this)));
         }
     }
-
     class InputHook
     {
 
@@ -2416,6 +2433,8 @@ namespace CSharpHotkeyLib
             //Keys UpDown       Keys.Up, Keys,Down
             //Keys SupressYN    Keys.Y, Keys.N
             //Action            OnKeyAction
+            //
+            //Note: Send(Keys Key) will NOT trigger InputHook() or HotKey(), but Send(string Keystrokes) will.
 
             if (UpDown != Keys.Up & UpDown != Keys.Down)
                 UpDown = Keys.Down;
@@ -2537,6 +2556,13 @@ namespace CSharpHotkeyLib
 
             if ((Keys)hookStruct.vkCode == RegisteredKey & Control.ModifierKeys == RegisteredModifiers)
             {
+                //except ignore Sending.Key from Send()
+                if (RegisteredKey == Sending.Key)
+                {
+                    Sending.Key = Keys.None;
+                    return false;
+                }
+
                 this.vkCode = hookStruct.vkCode;
                 this.scanCode = hookStruct.scanCode;
 

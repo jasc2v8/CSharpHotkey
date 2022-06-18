@@ -11,7 +11,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
-using System.Windows.Input; //Project, Add Reference, Search for "Presentation Core", Check to select, press OK.
 
 using Clipboard = System.Windows.Forms.Clipboard;
 using Cursor = System.Windows.Forms.Cursor;
@@ -783,6 +782,7 @@ namespace DEMO_CSharpHotkey
             bool SupressYes = true, SupressNo = false;
             bool KeyDown = true, KeyUp = false;
 
+            InputHook hookW = null;
             InputHook hookT = null;
             InputHook hookF = null;
             InputHook hookD1 = null;
@@ -792,6 +792,11 @@ namespace DEMO_CSharpHotkey
             InputHook hook_XButtonDown = null;
             InputHook hook_MOUSEWHEEL = null;
             InputHook hookEscapeDown = null;
+
+            hookW = new InputHook(Keys.None, Keys.W, Keys.Down, Keys.Y, (hook) =>
+            {
+                WriteLine("W pressed by User, not Send()");
+            });
 
             hookT = new InputHook(Keys.None, Keys.T, Keys.Down, Keys.Y, (hook) =>
             {
@@ -807,6 +812,7 @@ namespace DEMO_CSharpHotkey
             {
                 WriteLine("ESCAPE DOWN, vkCode = " + hook.vkCode + ", scanCode = " + hook.scanCode);
 
+                if (hookW.InProgress()) hookW.Stop();
                 if (hookT.InProgress()) hookT.Stop();
                 if (hookF.InProgress()) hookF.Stop();
                 if (hookD1.InProgress()) hookD1.Stop();
@@ -864,17 +870,26 @@ namespace DEMO_CSharpHotkey
             WriteLine("InputHooks started for keys   : Ctrl-Alt-D1, T (suppressed), F, ESCAPE.");
             WriteLine("InputHooks started for buttons: Alt-LButton, MButton, RButton, Wheel, XButton.");
             WriteLine("Press ESCAPE to terminate the tests and uninstall the hooks.");
+            WriteLine("Sending a W to verify it's ignored by InputHook().");
+            Win.Send(Keys.W);
         }
         public void DEMO_HotKey()
         {
             textBoxOutput.Clear();
+
             WriteLine("Test Hotkeys Action...");
             WriteLine("Uses public Class Hotkey");
 
+            HotKey hotkeyW = null;
             HotKey hotkeyD1 = null;
             HotKey hotkeyEscape = null;
 
             //Keys ControlAlt = Keys.Control | Keys.Alt;
+
+            hotkeyW = new HotKey(Keys.None, Keys.W, (none) =>
+            {
+                WriteLine("W HOTKEY PRESSED by User, not Send()");
+            });
 
             hotkeyD1 = new HotKey(Keys.Control | Keys.Alt, Keys.D1, (none) =>
             {
@@ -885,6 +900,7 @@ namespace DEMO_CSharpHotkey
             {
                 WriteLine("");
                 WriteLine("ESCAPE HOTKEY PRESSED!");
+                hotkeyW.UnRegister();
                 hotkeyD1.UnRegister();
                 hotkeyEscape.UnRegister();
                 WriteLine("Hotkeys UnRegistered.");
@@ -892,6 +908,10 @@ namespace DEMO_CSharpHotkey
 
             WriteLine("Hotkeys Registered: Ctrl-Alt-D1, and Escape.");
             WriteLine("Press Escape to end test.");
+
+            WriteLine("Sending W to verify Hotkey is NOT triggered by Send().");
+            Win.Send(Keys.W);
+
         }
         public void DEMO_InputBox()
         {

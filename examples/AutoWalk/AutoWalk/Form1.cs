@@ -71,16 +71,12 @@ namespace AutoWalk
 		private void StartHooks()
         {
 			hookW = new InputHook(Keys.None, Keys.W, Keys.Down, Keys.N, (hook) => { WalkKey = Keys.W; });
-			//hookA = new InputHook(Keys.None, Keys.A, Keys.Down, Keys.N, (hook) => { WalkKey = Keys.A; });
 			hookS = new InputHook(Keys.None, Keys.S, Keys.Down, Keys.N, (hook) => { WalkKey = Keys.S; });
-			//hookD = new InputHook(Keys.None, Keys.D, Keys.Down, Keys.N, (hook) => { WalkKey = Keys.D; });
 		}
 		private void StopHooks()
 		{
 			hookW.Stop();
-			//hookA.Stop();
 			hookS.Stop();
-			//hookD.Stop();
 		}
 		private void buttonSTART_Click(object sender, EventArgs e)
 		{
@@ -88,23 +84,20 @@ namespace AutoWalk
 			textBoxOutput.Focus();
 
 			//WriteLine("IN 3 SECONDS...");
-			//Win.Sleep(3000);PresentationCore
+			//Win.Sleep(3000);
 
 			hotkeySpace = new HotKey(Keys.None, Keys.Space, (hotkey) =>
             {
                 IsLooping = !IsLooping;
-				//WriteLine("IsLooping=" + IsLooping);
 
 				if (IsLooping)
                 {
-					StopHooks();
 					walkTimer.Start();
 				}
 				else
                 {
 					walkTimer.Stop();
                     Win.Send(WalkKey, Keys.Up);
-					StartHooks();
 				}
 			});
 
@@ -112,7 +105,7 @@ namespace AutoWalk
 
 			walkTimer = new System.Timers.Timer();
 			walkTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            walkTimer.Interval = (double)numericUpDownTimerInterval.Value; //recommend 33
+            walkTimer.Interval = (double)numericUpDownTimerInterval.Value; //recommend 33 minimum
             walkTimer.SynchronizingObject = this;
 
             numericUpDownTimerInterval.Enabled = false;

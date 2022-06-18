@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DEMO_CSharpHotkey")]
+[assembly: AssemblyTitle("csHotKeyTest")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DEMO_CSharpHotkey")]
+[assembly: AssemblyProduct("csHotKeyTest")]
 [assembly: AssemblyCopyright("Copyright ©  2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("db8c728e-39e8-4f6a-bf0b-144028aef128")]
+[assembly: Guid("146773c5-8855-45de-b1ab-569c4aad7f77")]
 
 // Version information for an assembly consists of the following four values:
 //
