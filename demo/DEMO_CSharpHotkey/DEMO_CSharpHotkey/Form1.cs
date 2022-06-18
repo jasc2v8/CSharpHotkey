@@ -11,6 +11,8 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
+using System.Windows.Input; //Project, Add Reference, Search for "Presentation Core", Check to select, press OK.
+
 using Clipboard = System.Windows.Forms.Clipboard;
 using Cursor = System.Windows.Forms.Cursor;
 
@@ -50,7 +52,7 @@ namespace DEMO_CSharpHotkey
 
             Win = new CSharpHotkeyLib.CSharpHotkey();
 
-            Win.SetTitleMatchMode(MATCH_MODE.Contains, MATCH_CASE.InSensitive);
+            Win.SetTitleMatchMode(MatchMode.Contains, MatchCase.InSensitive);
 
             WriteLine("This is a DEMO of CSharpHotkey" + Environment.NewLine +
                 Environment.NewLine +
@@ -63,7 +65,6 @@ namespace DEMO_CSharpHotkey
                 "See TEST_CSharpHotkey for interactive tests and examples." + Environment.NewLine +
                 Environment.NewLine +
                 "Press ESCAPE to abort the selected demo.");
-
 
             LoadListBox();
 
@@ -221,19 +222,13 @@ namespace DEMO_CSharpHotkey
 
             hookEscape = new InputHook(Keys.None, Keys.Escape, Keys.Down, Keys.N, (hook) =>
             {
+                hookEscape.Stop();
                 Win.SoundBeep(0, 300);
                 AbortFlag = true;
-                hookEscape.Stop();
                 return;
             });
 
             string WinTitle = GetWinTitle();
-
-            if (!Win.Exist(WinTitle))
-            {
-                string[] processName = WinTitle.Split(' ');
-                WinTitle = processName[processName.Length - 1];
-            }
 
             if (Win.Exist(WinTitle))
             {
@@ -242,14 +237,16 @@ namespace DEMO_CSharpHotkey
             else
             {
                 WriteLine("Window not found: " + WinTitle);
-                WriteLine("Starting Process: " + WinTitle);
+                string[] split = WinTitle.Split(' ');
+                string processName = split[split.Length - 1];
+                WriteLine("Starting Process: " + processName);
                 try
                 {
-                    Process.Start(WinTitle);
+                    Process.Start(processName);
                 }
                 catch
                 {
-                    WriteLine("Error starting process: " + WinTitle);
+                    WriteLine("Error starting process: " + processName);
                     return;
                 }
             }
@@ -262,7 +259,7 @@ namespace DEMO_CSharpHotkey
 
             //optionally, slow down if necessary
             Win.SetWinDelay(100); //default=100
-            Win.SetKeyDelay(1);     //default=10
+            Win.SetKeyDelay(10);  //default=10
             DemoDelay = 250;
 
             //move this DEMO window out of the way
@@ -312,11 +309,11 @@ namespace DEMO_CSharpHotkey
                 //Win.Send("^(A){DEL}");
 
                 //change font size
-                Win.Send("%OF{TAB}{TAB}^C26{ENTER}");
+                Win.Send("%OF{TAB}{TAB}^C24{ENTER}");
 
                 //type instructions
                 Win.Send("Please don't move mouse!{ENTER}");
-                Win.Send("Font size changed to 26.{ENTER}");
+                Win.Send("Font size changed to 24.{ENTER}");
                 Win.Send("Press ENTER to continue...{ENTER}");
                 Win.Sleep(DemoDelay);
                 if (AbortFlag) break;
@@ -416,21 +413,22 @@ namespace DEMO_CSharpHotkey
                 hookEscape.Stop();
 
             //restore font size
-            Win.Send("%(OF){TAB}{TAB}^(V)");
+            Win.Send("%OF{TAB}{TAB}^(V)");
             Win.Sleep(DemoDelay);
             Win.Send("{ENTER}");
             Win.Send("Font size restored.");
             Win.Sleep(DemoDelay);
             Win.Send("^(A){DEL}");
 
+            WinSendNotepad("MinimizeAllUndo...");
             Win.MinimizeAllUndo();
             Win.Sleep(500);
-            Win.Activate(WinTitle);
-            WinSendNotepad("MinimizeAllUndo...");
-            Win.Sleep(DemoDelay);
 
             //orignal size
             Win.Move(saveX, saveY, saveW, saveH);
+            Win.Sleep(DemoDelay);
+
+            //close notepad, activate this
             Win.Close(WinTitle);
             Win.Activate(this.Text);
 
@@ -440,10 +438,9 @@ namespace DEMO_CSharpHotkey
             else
                 WriteLine("Test complete.");
 
-            //reset WinDelay to default
+            //reset delays to default
             Win.SetWinDelay();
-
-            Win.Set(SET.NotTop, this.Text);
+            Win.SetKeyDelay();
         }
         private void WinSendNotepad(string Text)
         {
@@ -525,7 +522,7 @@ namespace DEMO_CSharpHotkey
             int delayMS = 3000;
             WriteLine("This DEMO will wait " + delayMS / 1000 + " seconds, then Click the Minimize button...");
             Win.Sleep(delayMS);
-            Win.Click(MOUSE_BUTTON.Left, x, y);
+            Win.Click(MouseButton.Left, x, y);
             WriteLine("Text complete.");
         }
         public void DEMO_Get()
@@ -548,12 +545,12 @@ namespace DEMO_CSharpHotkey
             string padRight = "{0,-16}";
 
             WriteLine(String.Format(padRight, "TITLE:") + Win.GetTitle(WinTitle));
-            WriteLine(String.Format(padRight, "ID:") + Win.Get(GET.ID));
-            WriteLine(String.Format(padRight, "ProcessName:") + Win.Get(GET.ProcessName));
-            WriteLine(String.Format(padRight, "ProcessPath:") + Win.Get(GET.ProcessPath));
+            WriteLine(String.Format(padRight, "ID:") + Win.Get(GetCommand.ID));
+            WriteLine(String.Format(padRight, "ProcessName:") + Win.Get(GetCommand.ProcessName));
+            WriteLine(String.Format(padRight, "ProcessPath:") + Win.Get(GetCommand.ProcessPath));
 
             //check string style for a given WS_ style (similar to AHK)
-            string style = Win.Get(GET.Style, "_name TestWindow");
+            string style = Win.Get(GetCommand.Style, "_name TestWindow");
             Int32.TryParse(style, System.Globalization.NumberStyles.HexNumber, null, out int bits);
             WriteLine(String.Format(padRight, "Style bits:") + bits.ToString("X"));
 
@@ -564,12 +561,12 @@ namespace DEMO_CSharpHotkey
             //now the easy way
             //WriteLine(String.Format(padRight, "EXIST:") +
 
-            WriteLine(String.Format(padRight, "EXIST:") + Win.Get(GET.Exist, "_name TestWindow"));
-            WriteLine(String.Format(padRight, "WS_DISABLED:") + Win.Get(GET.Disabled));
-            WriteLine(String.Format(padRight, "WS_MAXIMIZE:") + Win.Get(GET.Maximize));
-            WriteLine(String.Format(padRight, "WS_MINIMIZE:") + Win.Get(GET.Minimize));
-            WriteLine(String.Format(padRight, "WS_VISIBLE:") + Win.Get(GET.Visible));
-            WriteLine(String.Format(padRight, "NORMAL:") + Win.Get(GET.Normal));
+            WriteLine(String.Format(padRight, "EXIST:") + Win.Get(GetCommand.Exist, "_name TestWindow"));
+            WriteLine(String.Format(padRight, "WS_DISABLED:") + Win.Get(GetCommand.Disabled));
+            WriteLine(String.Format(padRight, "WS_MAXIMIZE:") + Win.Get(GetCommand.Maximize));
+            WriteLine(String.Format(padRight, "WS_MINIMIZE:") + Win.Get(GetCommand.Minimize));
+            WriteLine(String.Format(padRight, "WS_VISIBLE:") + Win.Get(GetCommand.Visible));
+            WriteLine(String.Format(padRight, "NORMAL:") + Win.Get(GetCommand.Normal));
 
             //demo 3 ways to get ActiveStats: AHK out format, Object, Rectangle
             Win.GetActiveStats(out WinTitle, out int Width, out int Height, out int X, out int Y);
@@ -612,12 +609,44 @@ namespace DEMO_CSharpHotkey
 
             textBoxOutput.Clear();
 
-            string WinTitle = "Untitled - Notepad _class Notepad";
+            InputHook hookEscape = null;
 
-            int timeout = 10;
+            hookEscape = new InputHook(Keys.None, Keys.Escape, Keys.Down, Keys.N, (hook) =>
+            {
+                hookEscape.Stop();
+                Win.SoundBeep(0, 300);
+                AbortFlag = true;
+                return;
+            });
 
-            WriteLine("Test window title = " + WinTitle);
-            WriteLine("Test window timeout value = " + timeout + " seconds");
+            string WinTitle = GetWinTitle();
+
+            if (Win.Exist(WinTitle))
+            {
+                WriteLine("Window found: " + WinTitle);
+            }
+            else
+            {
+                WriteLine("Window not found: " + WinTitle);
+                string[] split = WinTitle.Split(' ');
+                string processName = split[split.Length - 1];
+                WriteLine("Starting Process: " + processName);
+                try
+                {
+                    Process.Start(processName);
+                }
+                catch
+                {
+                    WriteLine("Error starting process: " + processName);
+                    return;
+                }
+            }
+
+            if (Win.Wait(WinTitle, 10))
+            {
+                WriteLine("TIMEOUT waiting for: " + WinTitle);
+                return;
+            }
 
             //optionally, slow down if necessary
             Win.SetWinDelay(100); //default=100
@@ -630,16 +659,6 @@ namespace DEMO_CSharpHotkey
             AbortFlag = false;
 
             RunningFlag = true;
-
-            InputHook hookEscape = null;
-
-            hookEscape = new InputHook(Keys.None, Keys.Escape, Keys.Down, Keys.N, (hook) =>
-            {
-                Win.SoundBeep(0,300);
-                AbortFlag = true;
-                hookEscape.Stop();
-                return;
-            });
 
             while (!AbortFlag && RunningFlag)
             {
@@ -661,12 +680,14 @@ namespace DEMO_CSharpHotkey
                 MoveCenter();
 
                 //change font size
-                Win.Send("%OF{TAB}{TAB}^C26{ENTER}");
+                Win.Send("%OF{TAB}{TAB}^C24{ENTER}");
 
                 //type instructions
                 Win.Send("Please don't move mouse!{ENTER}");
-                Win.Send("Font size changed to 26.{ENTER}");
+                Win.Send("Font size changed to 24.{ENTER}");
                 Win.Send("Press ENTER to continue...{ENTER}");
+                Win.Send("Press ESCAPE to abort!{ENTER}");
+
                 Win.Sleep(DemoDelay);
                 if (AbortFlag) break;
 
@@ -730,7 +751,7 @@ namespace DEMO_CSharpHotkey
             }
 
             //restore font size
-            Win.Send("%(OF){TAB}{TAB}^(V)");
+            Win.Send("%OF{TAB}{TAB}^(V)");
             Win.Sleep(DemoDelay);
             Win.Send("{ENTER}");
             Win.Send("Font size restored.");
@@ -751,7 +772,7 @@ namespace DEMO_CSharpHotkey
             else
                 WriteLine("Test complete.");
 
-            Win.Set(SET.NotTop, this.Text);
+            Win.Set(SetCommand.NotTop, this.Text);
 
             Win.SetWinDelay();
         }
@@ -853,12 +874,14 @@ namespace DEMO_CSharpHotkey
             HotKey hotkeyD1 = null;
             HotKey hotkeyEscape = null;
 
-            hotkeyD1 = new HotKey(CSharpHotkeyLib.HotKey.Modifiers.ControlAlt, Keys.D1, (none) =>
+            //Keys ControlAlt = Keys.Control | Keys.Alt;
+
+            hotkeyD1 = new HotKey(Keys.Control | Keys.Alt, Keys.D1, (none) =>
             {
-                WriteLine("D1 HOTKEY PRESSED!");
+                WriteLine("Ctrl-Alt-D1 HOTKEY PRESSED!");
             });
 
-            hotkeyEscape = new HotKey(MODKEY.None, Keys.Escape, (none) =>
+            hotkeyEscape = new HotKey(Keys.None, Keys.Escape, (none) =>
             {
                 WriteLine("");
                 WriteLine("ESCAPE HOTKEY PRESSED!");
@@ -922,20 +945,38 @@ namespace DEMO_CSharpHotkey
 
             WriteLine("Result: " + IB.Result + ", Value: " + IB.Value);
         }
-        public void DEMO_KeyLock()
+        public void DEMO_SetLockState()
         {
             textBoxOutput.Clear();
 
-            if (Control.IsKeyLocked(Keys.CapsLock))
-            {
-                Win.SetLockState(Keys.CapsLock, Keys.Up);
-                WriteLine("CapsLock OFF");
-            }
-            else
-            {
-                Win.SetLockState(Keys.CapsLock, Keys.Down);
-                WriteLine("CapsLock ON");
-            }
+            int DemoDelay = 1000;
+
+            //scroll lock is flakey on all my PCs, need to investigate.
+
+            WriteLine("Unlocking Num and Caps Locks...");
+
+            Win.SetLockState(Keys.NumLock, Keys.Up);
+            Win.SetLockState(Keys.CapsLock, Keys.Up);
+            //Win.SetLockState(Keys.Scroll, Keys.Up);
+
+            WriteLine("Setting Num, Caps, Scroll locks...");
+            Win.SetLockState(Keys.NumLock, Keys.Down);
+            Win.Sleep(DemoDelay);
+            Win.SetLockState(Keys.CapsLock, Keys.Down);
+            Win.Sleep(DemoDelay);
+            //Win.SetLockState(Keys.Scroll, Keys.Down);
+            //Win.Sleep(DemoDelay);
+
+            WriteLine("Unlock Num, Caps, Scroll locks...");
+            Win.SetLockState(Keys.NumLock, Keys.Up);
+            Win.Sleep(DemoDelay);
+            Win.SetLockState(Keys.CapsLock, Keys.Up);
+            Win.Sleep(DemoDelay);
+            //Win.SetLockState(Keys.Scroll, Keys.Up);
+            //Win.Send(Keys.Scroll);
+
+            WriteLine("Demo complete.");
+
         }
         public void DEMO_KeyState()
         {
@@ -1138,7 +1179,7 @@ namespace DEMO_CSharpHotkey
                 WriteLine("Timeout WaitImageSearch");
                 return;
             }
-            Win.Click(MOUSE_BUTTON.Left, rect.X, rect.Y);
+            Win.Click(MouseButton.Left, rect.X, rect.Y);
 
             //Win.Activate("The Internet");
 
@@ -1183,10 +1224,15 @@ namespace DEMO_CSharpHotkey
            if (!Win.Exist(WinTitle))
               Process.Start(WinTitle);
 
-            Win.Activate(WinTitle);
-            Win.WaitActive();
+            if (Win.Wait(WinTitle, 10))
+            {
+                WriteLine("TIMEOUT waiting for: " + WinTitle);
+                return;
+            }
 
-            Win.Sleep(250);
+            Win.Activate(WinTitle);
+
+            //Win.Sleep(250);
 
             //Win.Send("{TAB}Starting...{ENTER}");
 
@@ -1250,16 +1296,16 @@ namespace DEMO_CSharpHotkey
             }
 
             Win.Move(10, 10);
-            Win.Set(SET.AlwaysOnTop, WinTitle);
+            Win.Set(SetCommand.AlwaysOnTop, WinTitle);
 
             string oldTitle = Win.GetTitle(WinTitle);
 
             //enable - disable
             const string LASTFOUNDWINDOW = "";
-            Win.Set(SET.Disable, LASTFOUNDWINDOW);
+            Win.Set(SetCommand.Disable, LASTFOUNDWINDOW);
             MessageBox.Show("Confirm window is DISABLED then press OK:");
 
-            Win.Set(SET.Enable);
+            Win.Set(SetCommand.Enable);
             MessageBox.Show("Confirm window is ENABLED then press OK:");
 
             //SetTitle
@@ -1271,7 +1317,7 @@ namespace DEMO_CSharpHotkey
             MessageBox.Show(this, "Confirm WinTitle changed to 'New Title', then press OK:");
 
             Win.SetTitle(oldTitle);
-            Win.Set(SET.NotTop, WinTitle);
+            Win.Set(SetCommand.NotTop, WinTitle);
             Win.Minimize();
             WriteLine("Test complete!");
             Win.SetWinDelay();
@@ -1306,7 +1352,7 @@ namespace DEMO_CSharpHotkey
             WriteLine("Position Mouse within 3 seconds...");
             Win.Sleep(1000 * 3);
             Point point = Win.MouseGetPoint();
-            Color PixelColor = Win.PixelGetColor(point, PIXEL_MODE.RGB);
+            Color PixelColor = Win.PixelGetColor(point, PixelMode.RGB);
             WriteLine("Color: " + PixelColor.ToString());
         }
         public void DEMO_AllScreens()
@@ -1363,7 +1409,7 @@ namespace DEMO_CSharpHotkey
 
             WriteLine("Finally, close the window...");
 
-            if (Win.WaitClose("", TimeoutSeconds))
+            if (Win.WaitClose(WinTitle, TimeoutSeconds))
             {
                 WriteLine("TIMEOUT!");
             }
