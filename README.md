@@ -53,7 +53,7 @@ For my first Pandemic project, I started with [AHKEZ](https://github.com/jasc2v8
 
 Since my work is fully on Microsoft Windows, and all my PCs and server are on Microsoft Windows, I decided it was time to learn C programming.
 
-I downloaded Visual Studio 2022 and was amazed how mature this product it. There was a bit of a learning curve but I found my "dream" IDE. It's best suited for a higher power CPU and ample memory. I have an I7 @3.3GHZ (6 cores) with 16GB memory and very happy with the performance.
+I downloaded Visual Studio 2022 and was amazed how mature this product it. There was a bit of a learning curve but I found my "dream" IDE. It's best suited for a higher power CPU and ample memory. I'm very happy with the performance on my machine (see my Build Environment above).
 
 I've always wanted to learn C so I started with it and learned that it's best suited for low-level applications and not my area of interest.
 
