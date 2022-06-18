@@ -21,7 +21,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using System.Windows.Input; //Project, Add Reference, Search for "Presentation Core", Check to select, press OK.
+using System.Windows.Input; //Project, Add Reference, Assemblies, Search for "PresentationCore", Check to select, press OK.
+
 using Clipboard = System.Windows.Forms.Clipboard;
 using Cursor = System.Windows.Forms.Cursor;
 
