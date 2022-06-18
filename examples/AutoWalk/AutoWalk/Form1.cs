@@ -88,9 +88,9 @@ namespace AutoWalk
 			textBoxOutput.Focus();
 
 			//WriteLine("IN 3 SECONDS...");
-			//Win.Sleep(3000);
+			//Win.Sleep(3000);PresentationCore
 
-			hotkeySpace = new HotKey(HotKey.Modifiers.None, Keys.Space, (hotkey) =>
+			hotkeySpace = new HotKey(Keys.None, Keys.Space, (hotkey) =>
             {
                 IsLooping = !IsLooping;
 				//WriteLine("IsLooping=" + IsLooping);
@@ -122,7 +122,7 @@ namespace AutoWalk
 			StartHooks();
 
 			WinTitle = textBoxInput.Text;
-			Win.SetTitleMatchMode(MATCH_MODE.Contains, MATCH_CASE.InSensitive);
+			Win.SetTitleMatchMode(MatchMode.Contains, MatchCase.InSensitive);
 
 			//WriteLine("AutoWalk stared for WinTitle: " + WinTitle);
 			WriteLine("Press W, A, S, D to Auto Walk or SPACE to Start/Stop.");
