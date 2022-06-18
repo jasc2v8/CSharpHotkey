@@ -36,7 +36,7 @@ CSharpHotkey is NOT:
 <img src="resources/DEMO_CSharpHotkey_640.png"> 
 
 ## Build Tools
-- I7 CPU @3.3GHZ (6 cores) with 16GB memory.
+- i7 CPU @3.3GHZ (6 cores) with 16GB memory.
 - Visual Studio 2022 with .NET Framework 3.5 (for compatibility).
 - Can easily be converted to other Visual Studio, .NET Core, and .NET Framework versions.
 - Can easily be converted a static class if preferred (remove Constructor and change methods to static).
