@@ -15,6 +15,8 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Security.Principal;
 using System.Windows.Forms;
+using System.Windows.Input; //Project, Add Reference, Assemblies, Search for "PresentationCore", Check to select, press OK.
+using Cursors = System.Windows.Forms.Cursors;
 
 using UTIL;
 using CSharpHotkeyLib;
@@ -98,7 +100,7 @@ namespace AutoCredentialsTool
            
             this.Text += " v" + typeof(FormMain).Assembly.GetName().Version;
 
-            Win.SetTitleMatchMode(MATCH_MODE.Contains, MATCH_CASE.InSensitive);
+            Win.SetTitleMatchMode(MatchMode.Contains, MatchCase.InSensitive);
 
             notifyIcon1.Visible = true;
 
@@ -114,7 +116,7 @@ namespace AutoCredentialsTool
             if (ini.GetValue("LOG_FILE") == "True")
                 USE_LOG_FILE = true;
 
-            HotKey hotkeyControlAltU = new HotKey(HotKey.Modifiers.ControlAlt, Keys.U, (param) =>
+            HotKey hotkeyControlAltU = new HotKey(Keys.Control | Keys.Alt, Keys.U, (param) =>
             {
                 Win.SetKeyDelay(KEYDELAY);
                 Win.KeyWait(Keys.P, Keys.Up, 5);
@@ -123,7 +125,7 @@ namespace AutoCredentialsTool
                 Win.Send("{ENTER}");
             });
 
-            HotKey hotkeyControlAltP = new HotKey(HotKey.Modifiers.ControlAlt, Keys.P, (param) =>
+            HotKey hotkeyControlAltP = new HotKey(Keys.Control | Keys.Alt, Keys.P, (param) =>
             {
                 Win.SetKeyDelay(KEYDELAY);
                 Win.KeyWait(Keys.P, Keys.Up, 5);
@@ -314,7 +316,7 @@ namespace AutoCredentialsTool
 
                 Rectangle screenRect = Win.GetPos(WinTitle);
 
-                Win.Click(MOUSE_BUTTON.Left, screenRect.X + (screenRect.Width / 2), screenRect.Y + (screenRect.Height / 2));
+                Win.Click(MouseButton.Left, screenRect.X + (screenRect.Width / 2), screenRect.Y + (screenRect.Height / 2));
 
                 toolStripStatusLabel.Text = "Waiting for VPN PIN prompt...";
 
@@ -340,7 +342,7 @@ namespace AutoCredentialsTool
                 }
                 else
                 {
-                    Win.Click(MOUSE_BUTTON.Left, mouseX, mouseY);
+                    Win.Click(MouseButton.Left, mouseX, mouseY);
                 }
 
                 toolStripStatusLabel.Text = "Sending VPN PIN...";
@@ -406,7 +408,7 @@ namespace AutoCredentialsTool
             Show();
             Win.Activate(this.Text);
         }
-        private void notifyIcon1_MouseClick(object sender, MouseEventArgs e)
+        private void notifyIcon1_MouseClick(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             //handle left click only. right click is handled by the context menu
             if (e.Button == MouseButtons.Left)

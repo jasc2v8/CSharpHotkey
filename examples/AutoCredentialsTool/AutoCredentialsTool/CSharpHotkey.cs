@@ -1,5 +1,7 @@
-﻿/* 
-    2022-06-14-1620 v1.0.2 
+﻿/*
+    2022-06-17-1500 v0.0.4  Change Struct to Enum for function parameters
+    2022-06-17-0500 v0.0.3  Add Send(Keys.Key), fix SetLockState()
+    2022-06-14-1620 v0.0.2 
     
     TODO:
       continue testing and development
@@ -19,6 +21,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Windows.Input; //Project, Add Reference, Assemblies, Search for "PresentationCore", Check to select, press OK.
+
 using Clipboard = System.Windows.Forms.Clipboard;
 using Cursor = System.Windows.Forms.Cursor;
 
@@ -51,73 +55,62 @@ namespace CSharpHotkeyLib
     }
     #endregion Public Class Objects
 
-    #region Public Struct
+    #region Public Enum
 
-    public struct GET
+    public enum GetCommand
     {
-        public const int ID = 1;
-        public const int MinMax = 2;
-        public const int PID = 3;
-        public const int ProcessName = 4;
-        public const int ProcessPath = 5;
-        public const int Style = 6;
-
-        public const int Disabled = 7;
-        public const int Exist = 8;
-        public const int Maximize = 9;
-        public const int Minimize = 10;
-        public const int Normal = 11;
-        public const int Visible = 12;
+        ID = 1,
+        MinMax = 2,
+        PID = 3,
+        ProcessName = 4,
+        ProcessPath = 5,
+        Style = 6,
+        Disabled = 7,
+        Exist = 8,
+        Maximize = 9,
+        Minimize = 10,
+        Normal = 11,
+        Visible = 12,
     }
-    public struct MATCH_MODE
+    public enum SetCommand
     {
-        public const int StartsWith = 1;
-        public const int Contains = 2;
-        public const int Exact = 3;
-        public const int EndsWith = 4;
+        AlwaysOnTop = 1,
+        Bottom = 2,
+        Disable = 3,
+        Enable = 4,
+        NotTop = 5,
+        Top = 6,
     }
-    public struct MATCH_CASE
+    public enum MatchMode
     {
-        public const int InSensitive = 1;
-        public const int Sensitive = 2;
+        StartsWith = 1,
+        Contains = 2,
+        Exact = 3,
+        EndsWith = 4,
     }
-    public struct MOUSE_BUTTON
+    public enum MatchCase
     {
-        //Mouse - System.Windows.Input.MouseButton Enum
-        public const int Left = 0;
-        public const int Middle = 1;
-        public const int Right = 2;
+        InSensitive = 1,
+        Sensitive = 2,
     }
-    public struct SET
-    {
-        public const int AlwaysOnTop = 1;
-        public const int Bottom = 2;
-        public const int Disable = 3;
-        public const int Enable = 4;
-        public const int NotTop = 5;
-        public const int Top = 6;
-    }
-    public struct MODKEY
+    public enum ModKeys
     {
         //Hotkey modifiers
-        public const uint None = 0x0000; //custom
-        public const uint Alt = 0x0001;
-        public const uint Control = 0x0002;
-        public const uint Shift = 0x0004;
-        public const uint Win = 0x0008;
-        public const uint ControlAlt = MODKEY.Control + MODKEY.Alt; //custom
+        None = 0x0000, //custom
+        Alt = 0x0001,
+        Control = 0x0002,
+        Shift = 0x0004,
+        Win = 0x0008,
+        ControlAlt = ModKeys.Control + ModKeys.Alt, //custom
     }
-    public struct PIXEL_MODE
+    public enum PixelMode
     {
-        public const int BGR = 1;
-        public const int RGB = 2;
-    }
-    public struct WINAPI
-    {
-        public const int WM_HOTKEY = 0x0312;
+        BGR = 1,
+        RGB = 2,
     }
 
-    #endregion Public Struct
+    #endregion Public Enum
+
     public partial class CSharpHotkey
     {
 
@@ -134,16 +127,9 @@ namespace CSharpHotkeyLib
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        private class POINT
-        {
-            public int x;
-            public int y;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
         private class MouseLLHookStruct
         {
-            public POINT pt;
+            public Point pt;
             public int mouseData;
             public int flags;
             public int time;
@@ -162,8 +148,8 @@ namespace CSharpHotkeyLib
         //  WinWaitActive, WinWaitNotActive, or WinWait.
         //Here it's the window found by GetID(), which is used in most functions
         private static IntPtr LastFoundWindowHandle { get; set; }
-        private static int TitleMatchMode { get; set; }
-        private static int TitleMatchModeCase { get; set; }
+        private static MatchMode TitleMatchMode { get; set; }
+        private static MatchCase TitleMatchCase { get; set; }
         private static int KeyDelay { get; set; }
         private static int MouseDelay { get; set; }
         private static int WinDelay { get; set; }
@@ -186,8 +172,8 @@ namespace CSharpHotkeyLib
 
             LastFoundWindowHandle = IntPtr.Zero;
 
-            TitleMatchModeCase = MATCH_MODE.Exact;
-            TitleMatchModeCase = MATCH_CASE.Sensitive;
+            TitleMatchMode = MatchMode.Exact;
+            TitleMatchCase = MatchCase.Sensitive;
 
             KeyDelay = 10;
             MouseDelay = 10;
@@ -219,12 +205,11 @@ namespace CSharpHotkeyLib
             //BlockInput may only work if the script has been run as administrator.
             return Win32.BlockInput(Flag);
         }
-        public void Click(int MOUSE_BUTTON_PARAM = MOUSE_BUTTON.Left, Point MousePoint = default)
+        public void Click(MouseButton mb = MouseButton.Left, Point MousePoint = default)
         {
-            Click(MOUSE_BUTTON_PARAM, MousePoint.X, MousePoint.Y);
+            Click(mb, MousePoint.X, MousePoint.Y);
         }
-
-        public void Click(int MOUSE_BUTTON_PARAM = MOUSE_BUTTON.Left, int x = -1, int y = -1)
+        public void Click(MouseButton mb = MouseButton.Left, int x = -1, int y = -1)
         {
             //yes, I know mouse_event is depreciated
             //if a more robust solution is needed, there are several on Github and Nuget:
@@ -234,17 +219,17 @@ namespace CSharpHotkeyLib
             uint EVENT_DOWN = 0;
             uint EVENT_UP = 0;
 
-            switch (MOUSE_BUTTON_PARAM)
+            switch (mb)
             {
-                case MOUSE_BUTTON.Left:
+                case MouseButton.Left:
                     EVENT_DOWN = Win32.MOUSEEVENTF_LEFTDOWN;
                     EVENT_UP = Win32.MOUSEEVENTF_LEFTUP;
                     break;
-                case MOUSE_BUTTON.Middle:
+                case MouseButton.Middle:
                     EVENT_DOWN = Win32.MOUSEEVENTF_MIDDLEDOWN;
                     EVENT_UP = Win32.MOUSEEVENTF_MIDDLEUP;
                     break;
-                case MOUSE_BUTTON.Right:
+                case MouseButton.Right:
                     EVENT_DOWN = Win32.MOUSEEVENTF_RIGHTDOWN;
                     EVENT_UP = Win32.MOUSEEVENTF_RIGHTUP;
                     break;
@@ -291,7 +276,7 @@ namespace CSharpHotkeyLib
         {
             if (GetID(WinTitle) != IntPtr.Zero) { return true; } else { return false; }
         }
-        public string Get(int GET_PARAM, string WinTitle = "")
+        public string Get(GetCommand Command, string WinTitle = "")
         {
             IntPtr hWnd = GetID(WinTitle);
 
@@ -313,27 +298,27 @@ namespace CSharpHotkeyLib
 
             string result = String.Empty;
 
-            switch (GET_PARAM)
+            switch (Command)
             {
-                case GET.ID:
+                case GetCommand.ID:
                     break;
             }
 
-            if (GET_PARAM == GET.ID)
+            if (Command == GetCommand.ID)
             {
                 result = hWnd.ToString("X");
             } 
-            else if (GET_PARAM == GET.PID)
+            else if (Command == GetCommand.PID)
             {
                 result = pid.ToString("X");
             }
-            else if (GET_PARAM == GET.ProcessName)
+            else if (Command == GetCommand.ProcessName)
             {
                 Win32.GetWindowThreadProcessId(hWnd, out pid);
                 Process p = Process.GetProcessById(pid);
                 result = p.ProcessName;
             }
-            else if (GET_PARAM == GET.ProcessPath)
+            else if (Command == GetCommand.ProcessPath)
             {
                 const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
                 IntPtr hproc = Win32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid);
@@ -342,32 +327,32 @@ namespace CSharpHotkeyLib
                 string processPath = buffer.ToString();
                 result = processPath;
             }
-            else if (GET_PARAM == GET.Style)
+            else if (Command == GetCommand.Style)
             {
                 int style = Win32.GetWindowLong(hWnd, Win32.GWL_STYLE);
                 result = style.ToString("X");
             }
-            else if (GET_PARAM == GET.Disabled)
+            else if (Command == GetCommand.Disabled)
             {
                 if (isDisabled) result = "1";
             }
-            else if (GET_PARAM == GET.Exist)
+            else if (Command == GetCommand.Exist)
             {
                 if (isExist) result = "1";
             }
-            else if (GET_PARAM == GET.Maximize)
+            else if (Command == GetCommand.Maximize)
             {
                 if (isMax) result = "1";
             }
-            else if (GET_PARAM == GET.Minimize)
+            else if (Command == GetCommand.Minimize)
             {
                 if (isMin) result = "1";
             }
-            else if (GET_PARAM == GET.Normal)
+            else if (Command == GetCommand.Normal)
             {
                 if (isNormal) result = "1";
             }
-            else if (GET_PARAM == GET.Visible)
+            else if (Command == GetCommand.Visible)
             {
                 if (isVisible) result = "1";
             }
@@ -1204,7 +1189,7 @@ namespace CSharpHotkeyLib
         {
             return windowHandleDict;
         }
-        public Color PixelGetColor(Point point, int PIXEL_MODE_PARAM = PIXEL_MODE.RGB)
+        public Color PixelGetColor(Point point, PixelMode Mode = PixelMode.RGB)
         {
             Rectangle rect = Screen.PrimaryScreen.Bounds;
             Bitmap ScreenBmp = new Bitmap(rect.Width, rect.Height, PixelFormat.Format24bppRgb);
@@ -1214,7 +1199,7 @@ namespace CSharpHotkeyLib
 
             //GetPixel Color is RGB
             //if CSHK_PIXEL_MODE.BGR then convert from RGB to BGR
-            if (PIXEL_MODE_PARAM == PIXEL_MODE.BGR)
+            if (Mode == PixelMode.BGR)
             {
                 int iColorBGR = ColorTranslator.ToWin32(PixelColor);
                 PixelColor = Color.FromArgb(iColorBGR);
@@ -1223,7 +1208,7 @@ namespace CSharpHotkeyLib
 
         }
         public Point PixelSearch(Rectangle ScreenRect,
-            uint PixelColor, int PIXEL_MODE_PARAM = PIXEL_MODE.BGR,
+            uint PixelColor, PixelMode Mode = PixelMode.BGR,
             int Variation = 0)
         {
             //ScreenRect:   area of screen to search
@@ -1234,7 +1219,7 @@ namespace CSharpHotkeyLib
                 ScreenRect = Screen.PrimaryScreen.Bounds;
 
             //bitmap bytes are BGR. if CSHK_PIXEL_MODE.RGB then convert PixelColor from RGB to BGR
-            if (PIXEL_MODE_PARAM == PIXEL_MODE.RGB)
+            if (Mode == PixelMode.RGB)
             {
                 Color aColor = Color.FromArgb((int)PixelColor);
                 PixelColor = (uint)ColorTranslator.ToWin32(aColor);
@@ -1293,6 +1278,27 @@ namespace CSharpHotkeyLib
             bool result2 = Win32.SetForegroundWindow(GetID(WinTitle));
             DoDelay(WinDelay);
             return result1 | result2;
+        }
+        public void Send(Keys Key, Keys UpDown = Keys.Down | Keys.Up)
+        {
+            //yes, I know keybd_event is depreciated
+            //if a more robust solution is needed, there are several on Github and Nuget:
+            //https://github.com/search?q=InputSimulator+language%3AC%23&type=Repositories&ref=advsearch&l=C%23&l=
+            //https://www.nuget.org/packages?q=InputSimulator
+
+            if (UpDown == Keys.Down)
+            {
+                Win32.keybd_event((byte)Key, 0, Win32.KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+            }
+            else if (UpDown == Keys.Up)
+            {
+                Win32.keybd_event((byte)Key, 0, Win32.KEYEVENTF_KEYUP, UIntPtr.Zero);
+            }
+            else
+            {
+                Win32.keybd_event((byte)Key, 0, Win32.KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+                Win32.keybd_event((byte)Key, 0, Win32.KEYEVENTF_KEYUP, UIntPtr.Zero);
+            }
         }
         public void Send(string KeyStrokes, bool SendWait = true)
         {
@@ -1419,7 +1425,7 @@ namespace CSharpHotkeyLib
                 }
             }
         }
-        public bool Set(int SET_PARAM, string WinTitle = "")
+        public bool Set(SetCommand Command, string WinTitle = "")
         {
             /*
                 implemented:
@@ -1444,25 +1450,25 @@ namespace CSharpHotkeyLib
             IntPtr hWnd = GetID(WinTitle);
             IntPtr hWndInsertAfter = IntPtr.Zero;
 
-            switch (SET_PARAM)
+            switch (Command)
             {
-                case SET.AlwaysOnTop:
+                case SetCommand.AlwaysOnTop:
                     hWndInsertAfter = (IntPtr)Win32.HWND_TOPMOST;
                     break;
-                case SET.Bottom:
+                case SetCommand.Bottom:
                     hWndInsertAfter = (IntPtr)Win32.HWND_BOTTOM;
                     break;
-                case SET.Top:
+                case SetCommand.Top:
                     hWndInsertAfter = (IntPtr)Win32.HWND_TOP;
                     break;
-                case SET.NotTop:
+                case SetCommand.NotTop:
                     hWndInsertAfter = (IntPtr)Win32.HWND_NOTTOPMOST;
                     break;
-                case SET.Disable:
+                case SetCommand.Disable:
                     Win32.EnableWindow(hWnd, false);
                     Win32.UpdateWindow(hWnd);
                     break;
-                case SET.Enable:
+                case SetCommand.Enable:
                     Win32.EnableWindow(hWnd, true);
                     Win32.UpdateWindow(hWnd);
                     break;
@@ -1482,17 +1488,36 @@ namespace CSharpHotkeyLib
             if (State == Keys.Down && Control.IsKeyLocked(Key) || (State != Keys.Down && !Control.IsKeyLocked(Key)))
                 return;
 
-            uint MAPVK_VK_TO_VSC = 0;
-            uint scanCode = 0;
+            Send(Key);
 
-            scanCode = Win32.MapVirtualKey((uint)Key, MAPVK_VK_TO_VSC);
+            DoDelay(250);
 
-            Win32.keybd_event((byte)Key, (byte)scanCode, Win32.KEYEVENTF_EXTENDEDKEY, (UIntPtr)0);
-            Win32.keybd_event((byte)Key, (byte)scanCode, Win32.KEYEVENTF_EXTENDEDKEY | Win32.KEYEVENTF_KEYUP, (UIntPtr)0);
+            int i = 0;
+            int tries = 3;
 
-            bool reset_keyboard_state = Control.IsKeyLocked(Key);
+            for (i = 1; i <= tries; i++)
+            {
+                DoDelay(10);
 
-            DoDelay(KeyDelay);
+                if (State == Keys.Down && !Control.IsKeyLocked(Key))
+                    Send(Key);
+                else break;
+            }
+
+            //MessageBox.Show("TRIES DOWN=" + i);
+
+            for (i = 1; i <= tries; i++)
+            {
+                DoDelay(10);
+
+                if (State == Keys.Up && Control.IsKeyLocked(Key))
+                    Send(Key);
+                else break;
+            }
+
+            //MessageBox.Show("TRIES UP=" + i);
+
+            DoDelay(150);
         }
         public bool SetTitle(string NewTitle, string WinTitle = "")
         {
@@ -1503,41 +1528,41 @@ namespace CSharpHotkeyLib
             DoDelay(WinDelay);
             return result;
         }
-        public void SetTitleMatchMode(int MATCH_MODE_PARAM = MATCH_MODE.Exact, int MATCH_CASE_PARAM = MATCH_CASE.Sensitive)
+        public void SetTitleMatchMode(MatchMode Mode = MatchMode.Exact, MatchCase Case = MatchCase.Sensitive)
         {
-            TitleMatchMode = MATCH_MODE_PARAM;
-            TitleMatchModeCase = MATCH_CASE_PARAM;
+            TitleMatchMode = Mode;
+            TitleMatchCase = Case;
         }
         public void SetTitleMatchMode(string mode = "", string modeCase = "")
         {
             switch (mode)
             {
                 case "Contains":
-                    TitleMatchMode = MATCH_MODE.Contains;
+                    TitleMatchMode = MatchMode.Contains;
                     break;
                 case "EndsWith":
-                    TitleMatchMode = MATCH_MODE.EndsWith;
+                    TitleMatchMode = MatchMode.EndsWith;
                     break;
                 case "Exact":
-                    TitleMatchMode = MATCH_MODE.Exact;
+                    TitleMatchMode = MatchMode.Exact;
                     break;
                 case "StartsWith":
-                    TitleMatchMode = MATCH_MODE.StartsWith;
+                    TitleMatchMode = MatchMode.StartsWith;
                     break;
                 default:
-                    TitleMatchMode = MATCH_MODE.Exact;
+                    TitleMatchMode = MatchMode.Exact;
                     break;
             }
             switch (modeCase)
             {
                 case "Sensitive":
-                    TitleMatchModeCase = MATCH_CASE.Sensitive;
+                    TitleMatchCase = MatchCase.Sensitive;
                     break;
                 case "InSensitive":
-                    TitleMatchModeCase = MATCH_CASE.InSensitive;
+                    TitleMatchCase = MatchCase.InSensitive;
                     break;
                 default:
-                    TitleMatchModeCase = MATCH_CASE.Sensitive;
+                    TitleMatchCase = MatchCase.Sensitive;
                     break;
             }
         }
@@ -1770,16 +1795,16 @@ namespace CSharpHotkeyLib
 
             StringComparison comparisonType = StringComparison.Ordinal;
 
-            if (TitleMatchModeCase == MATCH_CASE.InSensitive)
+            if (TitleMatchCase == MatchCase.InSensitive)
             {
                 comparisonType = StringComparison.OrdinalIgnoreCase;
             }
 
-            if (TitleMatchMode == MATCH_MODE.StartsWith)
+            if (TitleMatchMode == MatchMode.StartsWith)
             {
                 if (haystack.StartsWith(needle, comparisonType)) { result = true; }
             }
-            else if (TitleMatchMode == MATCH_MODE.Contains)
+            else if (TitleMatchMode == MatchMode.Contains)
             {
                 if (comparisonType == StringComparison.OrdinalIgnoreCase)
                 {
@@ -1788,11 +1813,11 @@ namespace CSharpHotkeyLib
                 }
                 if (haystack.Contains(needle)) { result = true; }
             }
-            else if (TitleMatchMode == MATCH_MODE.Exact)
+            else if (TitleMatchMode == MatchMode.Exact)
             {
                 if (haystack.Equals(needle, comparisonType)) { result = true; }
             }
-            else if (TitleMatchMode == MATCH_MODE.EndsWith)
+            else if (TitleMatchMode == MatchMode.EndsWith)
             {
                 if (haystack.EndsWith(needle, comparisonType)) { result = true; }
             }
@@ -1834,6 +1859,7 @@ namespace CSharpHotkeyLib
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)] public static extern bool GetCursorPos(out System.Drawing.Point lpPoint);
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern IntPtr GetForegroundWindow();
             [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)] public static extern short GetKeyState(int vKey);
+            [DllImport("user32.dll", SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)] public static extern bool GetKeyboardState(byte[] lpKeyState);
             [DllImport("psapi.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern uint GetModuleFileNameEx(IntPtr hProcess, IntPtr hModule, [Out] StringBuilder lpBaseName, [In][MarshalAs(UnmanagedType.U4)] int nSize); 
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern IntPtr GetParent(IntPtr hWnd);
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
@@ -1891,6 +1917,7 @@ namespace CSharpHotkeyLib
             #endregion
 
             #region KEYEVENT
+            public const int KEYEVENTF_KEYDOWN = 0; //custom
             public const int KEYEVENTF_EXTENDEDKEY = 0x0001;
             public const int KEYEVENTF_KEYUP = 0x0002;
             public const int KEYEVENTF_UNICODE = 0x0004;
@@ -2268,24 +2295,25 @@ namespace CSharpHotkeyLib
 
     class HotKey : IMessageFilter
     {
+        /*
+         * https://stackoverflow.com/questions/18685726/how-can-i-prevent-registerhotkey-from-blocking-the-key-for-other-applications
+         * RegisterHotKey() registers global hotkeys.
+         * Hotkeys are processed before regular keyboard input processing, 
+         * meaning that if you register a hotkey successfully, 
+         * pressing that key will result in you getting your hotkey message rather than 
+         * the app with focus getting the normal WM_KEYDOWN/WM_CHAR messages. 
+         * You have effectively blocked other apps from seeing that key press.
+         */
+
         private class Win32
         {
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
-            public static extern bool RegisterHotKey(IntPtr hWnd, int id, Modifiers fsModifiers, Keys vk);
+            public static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, Keys vk);
 
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
             public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-        }
-        public enum Modifiers
-        {
-            None = 0,
-            Alt = 1,
-            Control = 2,
-            Shift = 4,
-            Windows = 8,
-            ControlAlt = Control + Alt //custom
         }
 
         private const int WM_HOTKEY = 0x0312;
@@ -2294,23 +2322,32 @@ namespace CSharpHotkeyLib
 
         private event Action<HotKey> onKeyAction;
 
-        public HotKey() { } //empty constructor if you'd rather call Register() separaately.
-        public HotKey(Modifiers Modifiers, Keys Key = Keys.None, Action<HotKey> OnKeyAction = null)
+        public HotKey() { } //empty constructor for option to call Register() separaately.
+        public HotKey(Keys Modifiers, Keys Key = Keys.None, Action<HotKey> OnKeyAction = null)
         {
             Register(Modifiers, Key, OnKeyAction);
         }
-        public bool Register(Modifiers Modifiers = Modifiers.None, Keys Key = Keys.None, Action<HotKey> OnKeyAction = null)
+        public bool Register(Keys Modifiers = Keys.None, Keys Key = Keys.None, Action<HotKey> OnKeyAction = null)
         {
             if (Key == Keys.None || OnKeyAction == null)
                 return false;
+
+            uint modifiers = 0;
+
+            if (((int)Modifiers & (int)Keys.Alt) == (int)Keys.Alt)
+                modifiers = modifiers | 1;
+            if (((int)Modifiers & (int)Keys.Control) == (int)Keys.Control)
+                modifiers = modifiers | 2;
+            if (((int)Modifiers & (int)Keys.Shift) == (int)Keys.Shift)
+                modifiers = modifiers | 4;
 
             this.onKeyAction = OnKeyAction;
 
             Application.AddMessageFilter(this);
 
-            HotKeyID = Key.GetHashCode() + Modifiers.GetHashCode();
+            HotKeyID = Key.GetHashCode() + modifiers.GetHashCode();
 
-            return Win32.RegisterHotKey(IntPtr.Zero, HotKeyID, Modifiers, Key);
+            return Win32.RegisterHotKey(IntPtr.Zero, HotKeyID, modifiers, Key);
         }
         public bool UnRegister()
         {
@@ -2326,7 +2363,6 @@ namespace CSharpHotkeyLib
             if (m.Msg == WM_HOTKEY && (int)m.WParam == HotKeyID)
             {
                 OnHotKeyAction();
-                return true;
             }
             return false;
         }
