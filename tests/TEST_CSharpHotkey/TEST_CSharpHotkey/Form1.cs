@@ -165,7 +165,7 @@ namespace csHotKeyTest
             WriteLine("ActiveStats:\tTitle: " + WinTitle +
                 ", W: " + Width + ", H: " + Height + ", X: " + X + ", Y: " + Y);
 
-            ObjActiveStats oas = new ObjActiveStats();
+            ActiveStatsObj oas = new ActiveStatsObj();
             oas = Win.GetActiveStats();
             WriteLine("ActiveStats:\tTitle: " + oas.Title +
                 ", W: " + oas.Bounds.Width + ", H: " + oas.Bounds.Height + 
@@ -180,7 +180,7 @@ namespace csHotKeyTest
             Rectangle rect = Win.GetPos();
             WriteLine("GetPos:\t\tX: " + rect.X + ", Y: " + rect.Y + ", W: " + rect.Width + ", H: " + rect.Height);
 
-            ObjMonitor m = new ObjMonitor();
+            MonitorObj m = new MonitorObj();
             m = Win.SysGetMonitor();
             WriteLine("Mon Bounds:\tX: " + m.Bounds.X + ", Y: " + m.Bounds.Y + ", W: " + m.Bounds.Width + ", H: " + m.Bounds.Height);
             WriteLine("Work Area :\tX: " + m.WorkingArea.X + ", Y: " + m.WorkingArea.Y + ", W: " + m.WorkingArea.Width + ", H: " + m.WorkingArea.Height);
@@ -330,7 +330,7 @@ namespace csHotKeyTest
 
             WriteLine("Opening InputBox with Timeout of " + TimeoutSeconds + " seconds");
 
-            ObjInputBox IB = new ObjInputBox();
+            InputBoxObj IB = new InputBoxObj();
 
             IB = Win.InputBox(Title, Prompt, Hide,
                 Location, TimeoutSeconds, Default, IconFile);
@@ -863,7 +863,7 @@ namespace csHotKeyTest
         private void buttonSysGet_Click(object sender, EventArgs e)
         {
 
-            ObjMonitor monitor = new ObjMonitor();
+            MonitorObj monitor = new MonitorObj();
 
             monitor = Win.SysGetMonitor();
 

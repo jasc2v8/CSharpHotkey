@@ -1,11 +1,4 @@
-﻿//
-//version history:
-//1.0.6.0   add KeyWait()
-//1.0.5.0   remove progress bar, add wait cursor
-//1.0.4.0   if username/password blank then edit credentials
-//1.0.3.0   SaveSettings()
-//1.0.2.0   larger progress bar
-//1.0.1.0   AutoHide
+﻿//1.0.7.0   CSharpHotkey v0.0.7
 
 using System;
 using System.Diagnostics;
@@ -15,7 +8,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Security.Principal;
 using System.Windows.Forms;
-using System.Windows.Input; //Project, Add Reference, Assemblies, Search for "PresentationCore", Check to select, press OK.
 using Cursors = System.Windows.Forms.Cursors;
 
 using UTIL;
@@ -27,7 +19,7 @@ namespace AutoCredentialsTool
     {
         private bool USE_LOG_FILE = true;
 
-        private const int KEYDELAY = 175; //default=100, type slower to avoid security detection
+        private const int KEYDELAY = 175; //default=10, type slower to avoid security detection
 
         CSharpHotkey Win = new CSharpHotkey();
 
@@ -97,7 +89,7 @@ namespace AutoCredentialsTool
 
             //TODO enable start after you've modified this code to run on your PC
             buttonStart.Enabled = false;
-           
+            
             this.Text += " v" + typeof(FormMain).Assembly.GetName().Version;
 
             Win.SetTitleMatchMode(MatchMode.Contains, MatchCase.InSensitive);
@@ -140,6 +132,7 @@ namespace AutoCredentialsTool
             //    formEdit.ShowDialog();
             //    ini.Reload();
             //}
+
         }
         private void buttonCancel_Click(object sender, EventArgs e)
         {
