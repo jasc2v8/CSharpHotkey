@@ -456,7 +456,7 @@ namespace DEMO_CSharpHotkey
         {
             textBoxOutput.Clear();
 
-            ObjInputBox IB = new ObjInputBox();
+            InputBoxObj IB = new InputBoxObj();
 
             string iconPath = Path.GetFullPath(@"..\..\Resources\csharp_128_multi.ico");
 
@@ -572,11 +572,11 @@ namespace DEMO_CSharpHotkey
             WriteLine(String.Format(padRight, "ActiveStats:") + "Title: " + WinTitle +
                 ", W: " + Width + ", H: " + Height + ", X: " + X + ", Y: " + Y);
 
-            ObjActiveStats oas = new ObjActiveStats();
-            oas = Win.GetActiveStats();
-            WriteLine(String.Format(padRight, "ActiveStats:") + "Title: " + oas.Title +
-                ", W: " + oas.Bounds.Width + ", H: " + oas.Bounds.Height +
-                ", X: " + oas.Bounds.X + ", Y: " + oas.Bounds.Y);
+            ActiveStatsObj aso = new ActiveStatsObj();
+            aso = Win.GetActiveStats();
+            WriteLine(String.Format(padRight, "ActiveStats:") + "Title: " + aso.Title +
+                ", W: " + aso.Bounds.Width + ", H: " + aso.Bounds.Height +
+                ", X: " + aso.Bounds.X + ", Y: " + aso.Bounds.Y);
 
             Rectangle WinRect;
             Win.GetActiveStats(out WinTitle, out WinRect);
@@ -588,7 +588,7 @@ namespace DEMO_CSharpHotkey
             WriteLine(String.Format(padRight, "GetPos:") + 
                 "X: " + rect.X + ", Y: " + rect.Y + ", W: " + rect.Width + ", H: " + rect.Height);
 
-            ObjMonitor m = new ObjMonitor();
+            MonitorObj m = new MonitorObj();
             m = Win.SysGetMonitor();
             WriteLine(String.Format(padRight, "Mon Bounds:") +
                 "X: " + m.Bounds.X + ", Y: " + m.Bounds.Y + ", W: " + m.Bounds.Width + ", H: " + m.Bounds.Height);
@@ -865,12 +865,12 @@ namespace DEMO_CSharpHotkey
             });
 
             WriteLine("Installed Keyboard and Mouse Hooks...");
+            WriteLine("Press ESCAPE to terminate the tests and uninstall the hooks.");
             WriteLine("Press T (suppress = true)");
             WriteLine("Press F (suppress = false)");
-            WriteLine("InputHooks started for keys   : Ctrl-Alt-D1, T (suppressed), F, ESCAPE.");
-            WriteLine("InputHooks started for buttons: Alt-LButton, MButton, RButton, Wheel, XButton.");
-            WriteLine("Press ESCAPE to terminate the tests and uninstall the hooks.");
-            WriteLine("Sending a W to verify it's ignored by InputHook().");
+            WriteLine("InputHooks keys   : Ctrl-Alt-D1, T (suppressed), F, W, ESCAPE.");
+            WriteLine("InputHooks buttons: Alt-LButton, MButton, RButton, Wheel, XButton.");
+            WriteLine("Send(Key.W) was pressed to verify it's ignored by InputHook().");
             Win.Send(Keys.W);
         }
         public void DEMO_HotKey()
@@ -906,10 +906,9 @@ namespace DEMO_CSharpHotkey
                 WriteLine("Hotkeys UnRegistered.");
             });
 
-            WriteLine("Hotkeys Registered: Ctrl-Alt-D1, and Escape.");
+            WriteLine("Hotkeys Registered: Ctrl-Alt-D1, W, and Escape.");
+            WriteLine("Send(Key.W) was pressed to verify it's ignored by HotKey().");
             WriteLine("Press Escape to end test.");
-
-            WriteLine("Sending W to verify Hotkey is NOT triggered by Send().");
             Win.Send(Keys.W);
 
         }
@@ -930,7 +929,7 @@ namespace DEMO_CSharpHotkey
 
             WriteLine("Opening InputBox with Timeout of " + TimeoutSeconds + " seconds");
 
-            ObjInputBox IB = new ObjInputBox();
+            InputBoxObj IB = new InputBoxObj();
 
             IB = Win.InputBox(Title, Prompt, Hide, Location, TimeoutSeconds, Default, IconFile);
             if (IB.Result == "OK")
@@ -1345,7 +1344,7 @@ namespace DEMO_CSharpHotkey
         public void DEMO_SysGet()
         {
 
-            ObjMonitor monitor = new ObjMonitor();
+            MonitorObj monitor = new MonitorObj();
 
             monitor = Win.SysGetMonitor();
 

@@ -1,4 +1,5 @@
 ﻿/*
+    2022-06-19-1045 v0.0.7  Send(Keys Key, Keys UpDown = Keys.None), renamed Objects (ex: ObjMonitor to MonitorObj)
     2022-06-18-1430 v0.0.6  Add Sending.Key so Send() doesn't trigger InputHook() or HotKey()
     2022-06-18-0630 v0.0.5  Remove reference to PresentationCore
     2022-06-17-1500 v0.0.4  Change Struct to Enum for function parameters
@@ -30,17 +31,17 @@ namespace CSharpHotkeyLib
 {
 
     #region Public Class Objects
-    public class ObjActiveStats
+    public class ActiveStatsObj
     {
         public string Title { get; set; }
         public Rectangle Bounds { get; set; }
     }
-    public class ObjInputBox
+    public class InputBoxObj
     {
         public string Result { get; set; }
         public string Value { get; set; }
     }
-    public class ObjMonitor
+    public class MonitorObj
     {
         public int Count { get; } = Screen.AllScreens.Count();
         public int Primary { get; set; } = 1;
@@ -48,7 +49,7 @@ namespace CSharpHotkeyLib
         public Rectangle WorkingArea { get; set; } = Screen.PrimaryScreen.WorkingArea;
         public string Name { get; set; } = Screen.PrimaryScreen.DeviceName;
     }
-    public class ObjMousePos
+    public class MousePosObj
     {
         public Point Point;
         public IntPtr Handle;
@@ -359,9 +360,9 @@ namespace CSharpHotkeyLib
             }
             return result;
         }
-        public ObjActiveStats GetActiveStats()
+        public ActiveStatsObj GetActiveStats()
         {
-            ObjActiveStats o = new ObjActiveStats();
+            ActiveStatsObj o = new ActiveStatsObj();
             o.Title = GetActiveTitle();
             o.Bounds = GetPos(o.Title);
             return o;
@@ -866,12 +867,12 @@ namespace CSharpHotkeyLib
             out string Result, out string Value,
             double TimeoutSeconds = int.MaxValue, string Default = "", string IconFile = "")
         {
-            ObjInputBox IB = new ObjInputBox();
+            InputBoxObj IB = new InputBoxObj();
             IB = InputBox(Title, Prompt, Hide, Location, TimeoutSeconds, Default, IconFile);
             Result = IB.Result;
             Value = IB.Value;
         }
-        public ObjInputBox InputBox(string Title, string Prompt, bool Hide, Point Location, 
+        public InputBoxObj InputBox(string Title, string Prompt, bool Hide, Point Location, 
             double TimeoutSeconds = int.MaxValue, string Default = "", string IconFile = "")
         {
             //AHK_L_v1 ErrorLevel: 0=OK, 1=CANCEL, 2=Timeout
@@ -880,7 +881,7 @@ namespace CSharpHotkeyLib
             //Result: "OK", "Cancel", "Timeout"
             //Value : User input, even if cancel or timeout
 
-            ObjInputBox IB = new ObjInputBox();
+            InputBoxObj IB = new InputBoxObj();
 
             if (Title == String.Empty)
                 Title = this.GetType().Name;// "CSharpHotkey";
@@ -1125,9 +1126,9 @@ namespace CSharpHotkeyLib
             Win32.GetCursorPos(out pt);
             return pt;
         }
-        public ObjMousePos MouseGetPos()
+        public MousePosObj MouseGetPos()
         {
-            ObjMousePos MP = new ObjMousePos();
+            MousePosObj MP = new MousePosObj();
             Win32.GetCursorPos(out MP.Point);
             Cursor cursor = new Cursor(Cursor.Current.Handle);
             MP.Handle = cursor.Handle;
@@ -1280,7 +1281,7 @@ namespace CSharpHotkeyLib
             DoDelay(WinDelay);
             return result1 | result2;
         }
-        public void Send(Keys Key, Keys UpDown = Keys.Down | Keys.Up)
+        public void Send(Keys Key, Keys UpDown = Keys.None)
         {
             //yes, I know keybd_event is depreciated
             //if a more robust solution is needed, there are several on Github and Nuget:
@@ -1305,6 +1306,7 @@ namespace CSharpHotkeyLib
         }
         public void Send(string KeyStrokes, bool SendWait = true)
         {
+            // sends KeyStrokes with a KeyDelay between each key
             // https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.sendkeys
             // + = Shift, ^ = Control, % = Alt
             // ^a = Ctrl then A, ^%(a) = Ctrl+Alt+A, 
@@ -1608,9 +1610,9 @@ namespace CSharpHotkeyLib
 
             Console.Beep(Frequency, Duration);
         }
-        public ObjMonitor SysGetMonitor(int MonitorNumber = 0)
+        public MonitorObj SysGetMonitor(int MonitorNumber = 0)
         {
-            ObjMonitor o = new ObjMonitor();
+            MonitorObj o = new MonitorObj();
 
             int i = (MonitorNumber < o.Count | MonitorNumber > o.Count)
                 ? Screen.AllScreens.Length - 1 : MonitorNumber;
