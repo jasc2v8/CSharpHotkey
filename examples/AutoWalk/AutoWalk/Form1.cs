@@ -19,180 +19,180 @@ using CSharpHotkeyLib;
 
 namespace AutoWalk
 {
-	public partial class Form1 : Form
-	{
-		private SendModeCommand SendModeSetting { get; set; }
+    public partial class Form1 : Form
+    {
+        private SendModeCommand SendModeSetting { get; set; }
 
-		private string WinTitle = string.Empty;
+        private string WinTitle = string.Empty;
 
-		InputHook hookW = null;
-		InputHook hookS = null;
-		HotKey hotkeySpace = null;
+        InputHook hookW = null;
+        InputHook hookS = null;
+        HotKey hotkeySpace = null;
 
-		System.Timers.Timer walkTimer = null;
-		
-		Keys WalkKey { get; set; }
-		Keys WalkKeyCurrent { get; set; }
+        System.Timers.Timer walkTimer = null;
 
-		bool IsLooping { get; set; }
-		string WalkWindow { get; set; }
+        Keys WalkKey { get; set; }
+        Keys WalkKeyCurrent { get; set; }
 
-		CSharpHotkey Win = new CSharpHotkey();
+        bool IsLooping { get; set; }
+        string WalkWindow { get; set; }
 
-		public Form1()
-		{
-			InitializeComponent();
+        CSharpHotkey Win = new CSharpHotkey();
 
-			this.Text = Assembly.GetEntryAssembly().GetName().Name + " v" + Assembly.GetEntryAssembly().GetName().Version;
-
-			textBoxInput.Text = "notepad _class notepad";
-
-		}
-		private void Form1_Load(object sender, EventArgs e)
-		{
-			//textBoxInput.Text = "Input...";
-			toolStripStatusLabel1.Text = "Ready.";
-
-			SendModeSetting = SendModeCommand.Event;
-			Win.SendMode(SendModeSetting);
-			buttonSendMode.Text = "SendEvent";
-
-		}
-
-		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-		{
-			//MessageBox.Show("timer1=" + timer1.Enabled);
-		}
-
-		private void WriteLine(string text)
-		{
-			textBoxOutput.AppendText(text + Environment.NewLine);
-		}
-		private void buttonClear_Click(object sender, EventArgs e)
-		{
-			textBoxOutput.Clear();
-			textBoxInput.Clear();
-			toolStripStatusLabel1.Text = "Ready.";
-		}
-
-		private void StartHooks()
+        public Form1()
         {
-			hookW = new InputHook(Keys.None, Keys.W, Keys.Down, Keys.N, (hook) => { WalkKey = Keys.W; });
-			hookS = new InputHook(Keys.None, Keys.S, Keys.Down, Keys.N, (hook) => { WalkKey = Keys.S; });
-		}
-		private void StopHooks()
-		{
-			hookW.Stop();
-			hookS.Stop();
-		}
-		private void buttonSTART_Click(object sender, EventArgs e)
-		{
+            InitializeComponent();
 
-			textBoxOutput.Focus();
+            this.Text = Assembly.GetEntryAssembly().GetName().Name + " v" + Assembly.GetEntryAssembly().GetName().Version;
 
-			//WriteLine("IN 3 SECONDS...");
-			//Win.Sleep(3000);
+            textBoxInput.Text = "notepad _class notepad";
 
-			hotkeySpace = new HotKey(Keys.None, Keys.Space, (hotkey) =>
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            //textBoxInput.Text = "Input...";
+            toolStripStatusLabel1.Text = "Ready.";
+
+            SendModeSetting = SendModeCommand.Event;
+            Win.SendMode(SendModeSetting);
+            buttonSendMode.Text = "SendEvent";
+
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            //MessageBox.Show("timer1=" + timer1.Enabled);
+        }
+
+        private void WriteLine(string text)
+        {
+            textBoxOutput.AppendText(text + Environment.NewLine);
+        }
+        private void buttonClear_Click(object sender, EventArgs e)
+        {
+            textBoxOutput.Clear();
+            textBoxInput.Clear();
+            toolStripStatusLabel1.Text = "Ready.";
+        }
+
+        private void StartHooks()
+        {
+            hookW = new InputHook(Keys.None, Keys.W, Keys.Down, Keys.N, (hook) => { WalkKey = Keys.W; });
+            hookS = new InputHook(Keys.None, Keys.S, Keys.Down, Keys.N, (hook) => { WalkKey = Keys.S; });
+        }
+        private void StopHooks()
+        {
+            hookW.Stop();
+            hookS.Stop();
+        }
+        private void buttonSTART_Click(object sender, EventArgs e)
+        {
+
+            textBoxOutput.Focus();
+
+            //WriteLine("IN 3 SECONDS...");
+            //Win.Sleep(3000);
+
+            hotkeySpace = new HotKey(Keys.None, Keys.Space, (hotkey) =>
             {
                 IsLooping = !IsLooping;
 
-				if (IsLooping)
+                if (IsLooping)
                 {
-					walkTimer.Start();
-				}
-				else
+                    walkTimer.Start();
+                }
+                else
                 {
-					walkTimer.Stop();
+                    walkTimer.Stop();
                     Win.Send(WalkKey, Keys.Up);
-				}
-			});
+                }
+            });
 
             WalkKey = Keys.W;
 
-			walkTimer = new System.Timers.Timer();
-			walkTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            walkTimer = new System.Timers.Timer();
+            walkTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             walkTimer.Interval = (double)numericUpDownTimerInterval.Value; //recommend 33 minimum
             walkTimer.SynchronizingObject = this;
 
             numericUpDownTimerInterval.Enabled = false;
-			textBoxInput.Enabled = false;
+            textBoxInput.Enabled = false;
 
-			IsLooping = false;
-			StartHooks();
+            IsLooping = false;
+            StartHooks();
 
-			WinTitle = textBoxInput.Text;
-			Win.SetTitleMatchMode(MatchMode.Contains, MatchCase.InSensitive);
+            WinTitle = textBoxInput.Text;
+            Win.SetTitleMatchMode(MatchMode.Contains, MatchCase.InSensitive);
 
-			//WriteLine("AutoWalk stared for WinTitle: " + WinTitle);
-			WriteLine("Press W, A, S, D to Auto Walk or SPACE to Start/Stop.");
+            //WriteLine("AutoWalk stared for WinTitle: " + WinTitle);
+            WriteLine("Press W, A, S, D to Auto Walk or SPACE to Start/Stop.");
 
-			toolStripStatusLabel1.Text = "AutoWalk STARTED.";
+            toolStripStatusLabel1.Text = "AutoWalk STARTED.";
 
-		}
+        }
 
-		private void OnTimedEvent(object source, ElapsedEventArgs e)
-		{
-			if (!Win.Active(WinTitle))
-				return;
+        private void OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            if (!Win.Active(WinTitle))
+                return;
 
-			if (WalkKeyCurrent != Keys.W & Win.GetKeyState(Keys.W)) { WalkKey = Keys.W; }
-			if (WalkKeyCurrent != Keys.S & Win.GetKeyState(Keys.S)) { WalkKey = Keys.S; }
+            if (WalkKeyCurrent != Keys.W & Win.GetKeyState(Keys.W)) { WalkKey = Keys.W; }
+            if (WalkKeyCurrent != Keys.S & Win.GetKeyState(Keys.S)) { WalkKey = Keys.S; }
 
-			if (WalkKeyCurrent != WalkKey)
+            if (WalkKeyCurrent != WalkKey)
             {
-				Win.Send(WalkKeyCurrent, Keys.Up);
+                Win.Send(WalkKeyCurrent, Keys.Up);
 
-				WalkKeyCurrent = WalkKey;
-				//return;
+                WalkKeyCurrent = WalkKey;
+                //return;
             }
 
-			Win.Send(WalkKeyCurrent, Keys.Down);
-		}
+            Win.Send(WalkKeyCurrent, Keys.Down);
+        }
         private void buttonStop_Click(object sender, EventArgs e)
         {
 
-			//WriteLine("AutoWalk STOPPED.");
-			toolStripStatusLabel1.Text = "AutoWalk STOPPED.";
+            //WriteLine("AutoWalk STOPPED.");
+            toolStripStatusLabel1.Text = "AutoWalk STOPPED.";
 
-			if (walkTimer == null || hookW == null || hotkeySpace == null)
-				return;
+            if (walkTimer == null || hookW == null || hotkeySpace == null)
+                return;
 
-			IsLooping = false;
-			walkTimer.Stop();
-			walkTimer.Dispose();
+            IsLooping = false;
+            walkTimer.Stop();
+            walkTimer.Dispose();
 
-			StopHooks();
-			hookW = null;
-			hookS = null;
+            StopHooks();
+            hookW = null;
+            hookS = null;
 
-			hotkeySpace.UnRegister();
-			hotkeySpace = null;
+            hotkeySpace.UnRegister();
+            hotkeySpace = null;
 
-			Win.Send(WalkKeyCurrent, Keys.Up);
+            Win.Send(WalkKeyCurrent, Keys.Up);
 
-			numericUpDownTimerInterval.Enabled = true;
-			textBoxInput.Enabled = true;
+            numericUpDownTimerInterval.Enabled = true;
+            textBoxInput.Enabled = true;
 
-		}
+        }
 
         private void buttonSendMode_Click(object sender, EventArgs e)
         {
-			if (SendModeSetting == SendModeCommand.Event)
+            if (SendModeSetting == SendModeCommand.Event)
             {
-				SendModeSetting = SendModeCommand.Input;
-				Win.SendMode(SendModeSetting);
-				//WriteLine("SendMode = Input");
-				buttonSendMode.Text = "SendInput";
-			}
-			else
-			{
-				SendModeSetting = SendModeCommand.Event;
-				Win.SendMode(SendModeSetting);
-				//WriteLine("SendMode = Event");
-				buttonSendMode.Text = "SendEvent";
-			}
-		}
-	}
+                SendModeSetting = SendModeCommand.Input;
+                Win.SendMode(SendModeSetting);
+                //WriteLine("SendMode = Input");
+                buttonSendMode.Text = "SendInput";
+            }
+            else
+            {
+                SendModeSetting = SendModeCommand.Event;
+                Win.SendMode(SendModeSetting);
+                //WriteLine("SendMode = Event");
+                buttonSendMode.Text = "SendEvent";
+            }
+        }
+    }
 
 }
