@@ -1,6 +1,10 @@
 ﻿/*
+ 
+    2022-06-21-0900 v0.0.9  SendMode(SendModeCommand.Event or SendModeCommand.Input), renamed UpDown to DownOrUp
+    2022-06-19-1650 v0.0.8  SendInput(Keys Key, Keys UpDown = Keys.None)
+    2022-06-19-1045 v0.0.7  Send(Keys Key, Keys UpDown = Keys.None), renamed Objects (ex: ObjMonitor to MonitorObj)
     2022-06-18-1430 v0.0.6  Add Sending.Key so Send() doesn't trigger InputHook() or HotKey()
-    2022-06-18-0630 v0.0.5  Remove reference to PresentationCore
+    2022-06-18-0630 v0.0.5  Remove reference to PresentationCore, add MouseButton
     2022-06-17-1500 v0.0.4  Change Struct to Enum for function parameters
     2022-06-17-0500 v0.0.3  Add Send(Keys.Key), fix SetLockState()
     2022-06-14-1620 v0.0.2 
@@ -30,17 +34,17 @@ namespace CSharpHotkeyLib
 {
 
     #region Public Class Objects
-    public class ObjActiveStats
+    public class ActiveStatsObj
     {
         public string Title { get; set; }
         public Rectangle Bounds { get; set; }
     }
-    public class ObjInputBox
+    public class InputBoxObj
     {
         public string Result { get; set; }
         public string Value { get; set; }
     }
-    public class ObjMonitor
+    public class MonitorObj
     {
         public int Count { get; } = Screen.AllScreens.Count();
         public int Primary { get; set; } = 1;
@@ -48,7 +52,7 @@ namespace CSharpHotkeyLib
         public Rectangle WorkingArea { get; set; } = Screen.PrimaryScreen.WorkingArea;
         public string Name { get; set; } = Screen.PrimaryScreen.DeviceName;
     }
-    public class ObjMousePos
+    public class MousePosObj
     {
         public Point Point;
         public IntPtr Handle;
@@ -75,6 +79,11 @@ namespace CSharpHotkeyLib
         Minimize = 10,
         Normal = 11,
         Visible = 12,
+    }
+    public enum SendModeCommand
+    {
+        Event = 0,
+        Input = 1,
     }
     public enum SetCommand
     {
@@ -153,6 +162,7 @@ namespace CSharpHotkeyLib
         private static MatchCase TitleMatchCase { get; set; }
         private static int KeyDelay { get; set; }
         private static int MouseDelay { get; set; }
+        private static SendModeCommand SendModeSelection { get; set; } = SendModeCommand.Event;
         private static int WinDelay { get; set; }
         public bool MouseEventHandledFlag { get; set; }
         #endregion Properties
@@ -359,9 +369,9 @@ namespace CSharpHotkeyLib
             }
             return result;
         }
-        public ObjActiveStats GetActiveStats()
+        public ActiveStatsObj GetActiveStats()
         {
-            ObjActiveStats o = new ObjActiveStats();
+            ActiveStatsObj o = new ActiveStatsObj();
             o.Title = GetActiveTitle();
             o.Bounds = GetPos(o.Title);
             return o;
@@ -866,12 +876,12 @@ namespace CSharpHotkeyLib
             out string Result, out string Value,
             double TimeoutSeconds = int.MaxValue, string Default = "", string IconFile = "")
         {
-            ObjInputBox IB = new ObjInputBox();
+            InputBoxObj IB = new InputBoxObj();
             IB = InputBox(Title, Prompt, Hide, Location, TimeoutSeconds, Default, IconFile);
             Result = IB.Result;
             Value = IB.Value;
         }
-        public ObjInputBox InputBox(string Title, string Prompt, bool Hide, Point Location, 
+        public InputBoxObj InputBox(string Title, string Prompt, bool Hide, Point Location, 
             double TimeoutSeconds = int.MaxValue, string Default = "", string IconFile = "")
         {
             //AHK_L_v1 ErrorLevel: 0=OK, 1=CANCEL, 2=Timeout
@@ -880,7 +890,7 @@ namespace CSharpHotkeyLib
             //Result: "OK", "Cancel", "Timeout"
             //Value : User input, even if cancel or timeout
 
-            ObjInputBox IB = new ObjInputBox();
+            InputBoxObj IB = new InputBoxObj();
 
             if (Title == String.Empty)
                 Title = this.GetType().Name;// "CSharpHotkey";
@@ -1125,9 +1135,9 @@ namespace CSharpHotkeyLib
             Win32.GetCursorPos(out pt);
             return pt;
         }
-        public ObjMousePos MouseGetPos()
+        public MousePosObj MouseGetPos()
         {
-            ObjMousePos MP = new ObjMousePos();
+            MousePosObj MP = new MousePosObj();
             Win32.GetCursorPos(out MP.Point);
             Cursor cursor = new Cursor(Cursor.Current.Handle);
             MP.Handle = cursor.Handle;
@@ -1280,20 +1290,26 @@ namespace CSharpHotkeyLib
             DoDelay(WinDelay);
             return result1 | result2;
         }
-        public void Send(Keys Key, Keys UpDown = Keys.Down | Keys.Up)
+        public void SendMode(SendModeCommand Mode)
         {
-            //yes, I know keybd_event is depreciated
-            //if a more robust solution is needed, there are several on Github and Nuget:
-            //https://github.com/search?q=InputSimulator+language%3AC%23&type=Repositories&ref=advsearch&l=C%23&l=
-            //https://www.nuget.org/packages?q=InputSimulator
-
+            SendModeSelection = Mode;
+        }
+        public void Send(Keys Key, Keys DownOrUp = Keys.None)
+        {
+            if (SendModeSelection == SendModeCommand.Event)
+                SendEvent(Key, DownOrUp);
+            else
+                SendInput(Key, DownOrUp);
+        }
+        public void SendEvent(Keys Key, Keys DownOrUp = Keys.None)
+        {
             Sending.Key = Key; //signal InputHook() and HotKey() to ignore this Key
 
-            if (UpDown == Keys.Down)
+            if (DownOrUp == Keys.Down)
             {
                 Win32.keybd_event((byte)Key, 0, Win32.KEYEVENTF_KEYDOWN, UIntPtr.Zero);
             }
-            else if (UpDown == Keys.Up)
+            else if (DownOrUp == Keys.Up)
             {
                 Win32.keybd_event((byte)Key, 0, Win32.KEYEVENTF_KEYUP, UIntPtr.Zero);
             }
@@ -1302,9 +1318,56 @@ namespace CSharpHotkeyLib
                 Win32.keybd_event((byte)Key, 0, Win32.KEYEVENTF_KEYDOWN, UIntPtr.Zero);
                 Win32.keybd_event((byte)Key, 0, Win32.KEYEVENTF_KEYUP, UIntPtr.Zero);
             }
+            DoDelay(KeyDelay);
+        }
+        public void SendInput(Keys Key, Keys UpDown = Keys.None)
+        {
+            void _KeyDown(ushort VKey)
+            {
+                Win32.INPUT[] inputs = new Win32.INPUT[1];
+                inputs[0].type = Win32.INPUT_KEYBOARD;
+                inputs[0].UNION.ki.wVk = (ushort)Key;
+                inputs[0].UNION.ki.dwFlags = 0;
+                inputs[0].UNION.ki.wScan = 0;
+                if (Win32.SendInput(1, inputs, Marshal.SizeOf(typeof(Win32.INPUT))) != 1)
+                    throw new Exception("Could not send key: " + Key);
+            }
+            void _KeyUp(ushort VKey)
+            {
+                Win32.INPUT[] inputs = new Win32.INPUT[1];
+                inputs[0].type = Win32.INPUT_KEYBOARD;
+                inputs[0].UNION.ki.wVk = (ushort)Key;
+                inputs[0].UNION.ki.dwFlags = Win32.KEYEVENTF_KEYUP;
+                inputs[0].UNION.ki.wScan = 0;
+                if (Win32.SendInput(1, inputs, Marshal.SizeOf(typeof(Win32.INPUT))) != 1)
+                    throw new Exception("Could not send key: " + Key);
+            }
+            void _KeyPress(ushort VKey)
+            {
+                _KeyDown(VKey);
+                _KeyUp(VKey);
+            }
+
+            Sending.Key = Key; //signal InputHook() and HotKey() to ignore this Key
+
+            if (UpDown == Keys.Down)
+            {
+                _KeyDown((ushort)Key);
+            }
+            else if (UpDown == Keys.Up)
+            {
+                _KeyUp((ushort)Key);
+            }
+            else
+            {
+                _KeyPress((ushort)Key);
+            }
+
+            DoDelay(KeyDelay);
         }
         public void Send(string KeyStrokes, bool SendWait = true)
         {
+            // sends KeyStrokes with a KeyDelay between each key
             // https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.sendkeys
             // + = Shift, ^ = Control, % = Alt
             // ^a = Ctrl then A, ^%(a) = Ctrl+Alt+A, 
@@ -1487,44 +1550,17 @@ namespace CSharpHotkeyLib
             DoDelay(WinDelay);
             return result;
         }
-        public void SetLockState(Keys Key, Keys State)
+        public void SetLockState(Keys Key, Keys UpDown)
         {
             if (Key != Keys.CapsLock & Key != Keys.Scroll & Key != Keys.NumLock & Key != Keys.Insert)
                 return;
 
-            if (State == Keys.Down && Control.IsKeyLocked(Key) || (State != Keys.Down && !Control.IsKeyLocked(Key)))
+            if (UpDown == Keys.Down && Control.IsKeyLocked(Key) || (UpDown != Keys.Down && !Control.IsKeyLocked(Key)))
                 return;
 
             Send(Key);
 
-            DoDelay(250);
-
-            int i = 0;
-            int tries = 3;
-
-            for (i = 1; i <= tries; i++)
-            {
-                DoDelay(10);
-
-                if (State == Keys.Down && !Control.IsKeyLocked(Key))
-                    Send(Key);
-                else break;
-            }
-
-            //MessageBox.Show("TRIES DOWN=" + i);
-
-            for (i = 1; i <= tries; i++)
-            {
-                DoDelay(10);
-
-                if (State == Keys.Up && Control.IsKeyLocked(Key))
-                    Send(Key);
-                else break;
-            }
-
-            //MessageBox.Show("TRIES UP=" + i);
-
-            DoDelay(150);
+            DoDelay(KeyDelay);
         }
         public bool SetTitle(string NewTitle, string WinTitle = "")
         {
@@ -1608,9 +1644,9 @@ namespace CSharpHotkeyLib
 
             Console.Beep(Frequency, Duration);
         }
-        public ObjMonitor SysGetMonitor(int MonitorNumber = 0)
+        public MonitorObj SysGetMonitor(int MonitorNumber = 0)
         {
-            ObjMonitor o = new ObjMonitor();
+            MonitorObj o = new MonitorObj();
 
             int i = (MonitorNumber < o.Count | MonitorNumber > o.Count)
                 ? Screen.AllScreens.Length - 1 : MonitorNumber;
@@ -1881,8 +1917,9 @@ namespace CSharpHotkeyLib
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern uint MapVirtualKey(uint uCode, uint uMapType); 
             [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern IntPtr OpenProcess(uint processAccess, bool bInheritHandle, int processId); 
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)][return: MarshalAs(UnmanagedType.Bool)] public static extern bool PostMessage(HandleRef hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-            [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)] public static extern bool SetCursorPos(int x, int y);
+            [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)][return: MarshalAs(UnmanagedType.Bool)] public static extern bool SetCursorPos(int x, int y);
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)][return: MarshalAs(UnmanagedType.Bool)] public static extern bool SetForegroundWindow(IntPtr hWnd);
+            [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize); 
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern IntPtr SendMessageTimeout(IntPtr windowHandle, uint Msg, IntPtr wParam, IntPtr lParam, int flags, uint timeout, out IntPtr result);
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)][return: MarshalAs(UnmanagedType.Bool)] public static extern bool SetWindowText(IntPtr hwnd, String lpString);
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)][return: MarshalAs(UnmanagedType.Bool)] public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
@@ -1896,6 +1933,54 @@ namespace CSharpHotkeyLib
                 public int Top;         // y position of upper-left corner
                 public int Right;       // x position of lower-right corner
                 public int Bottom;      // y position of lower-right corner
+            }
+            [StructLayout(LayoutKind.Sequential)]
+            public struct INPUT
+            {
+                internal uint type;
+                internal InputUnion UNION;
+            }
+
+            // For use with the INPUT struct, see SendInput for an example
+            public const int INPUT_MOUSE = 0;
+            public const int INPUT_KEYBOARD = 1;
+            public const int INPUT_HARDWARE = 2;
+
+            [StructLayout(LayoutKind.Explicit)]
+            internal struct InputUnion
+            {
+                [FieldOffset(0)]
+                internal MOUSEINPUT mi;
+                [FieldOffset(0)]
+                internal KEYBDINPUT ki;
+                [FieldOffset(0)]
+                internal HARDWAREINPUT hi;
+            }
+            [StructLayout(LayoutKind.Sequential)]
+            internal struct MOUSEINPUT
+            {
+                internal int dx;
+                internal int dy;
+                internal int mouseData;
+                internal int dwFlags; // MOUSEEVENTF dwFlags;
+                internal uint time;
+                internal UIntPtr dwExtraInfo;
+            }
+            [StructLayout(LayoutKind.Sequential)]
+            internal struct KEYBDINPUT
+            {
+                internal ushort wVk; // VirtualKeyShort wVk;
+                internal ushort wScan;// ScanCodeShort wScan;
+                internal uint dwFlags; // KEYEVENTF dwFlags;
+                internal uint time;
+                internal UIntPtr dwExtraInfo;
+            }
+            [StructLayout(LayoutKind.Sequential)]
+            internal struct HARDWAREINPUT
+            {
+                internal int uMsg;
+                internal short wParamL;
+                internal short wParamH;
             }
             #region Win32 Constants
 
@@ -2374,8 +2459,12 @@ namespace CSharpHotkeyLib
             {
                 //except ignore Sending.Key by Send()
                 int sendingKeyID = Sending.Key.GetHashCode() + Keys.None.GetHashCode();
-                if ((int)m.WParam == sendingKeyID)
+
+
+                if ((int)m.WParam == sendingKeyID) //(int)Sending.Key)
                 {
+                    //MessageBox.Show("HOTKEY Sending.Key=" + Sending.Key + ", key=" + m.WParam + ", SendingKeyID=" + sendingKeyID);
+
                     Sending.Key = Keys.None;
                     return false;
                 }

@@ -21,6 +21,8 @@ namespace AutoWalk
 {
 	public partial class Form1 : Form
 	{
+		private SendModeCommand SendModeSetting { get; set; }
+
 		private string WinTitle = string.Empty;
 
 		InputHook hookW = null;
@@ -50,6 +52,11 @@ namespace AutoWalk
 		{
 			//textBoxInput.Text = "Input...";
 			toolStripStatusLabel1.Text = "Ready.";
+
+			SendModeSetting = SendModeCommand.Event;
+			Win.SendMode(SendModeSetting);
+			buttonSendMode.Text = "SendEvent";
+
 		}
 
 		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -167,6 +174,24 @@ namespace AutoWalk
 			numericUpDownTimerInterval.Enabled = true;
 			textBoxInput.Enabled = true;
 
+		}
+
+        private void buttonSendMode_Click(object sender, EventArgs e)
+        {
+			if (SendModeSetting == SendModeCommand.Event)
+            {
+				SendModeSetting = SendModeCommand.Input;
+				Win.SendMode(SendModeSetting);
+				//WriteLine("SendMode = Input");
+				buttonSendMode.Text = "SendInput";
+			}
+			else
+			{
+				SendModeSetting = SendModeCommand.Event;
+				Win.SendMode(SendModeSetting);
+				//WriteLine("SendMode = Event");
+				buttonSendMode.Text = "SendEvent";
+			}
 		}
 	}
 

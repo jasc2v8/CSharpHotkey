@@ -42,6 +42,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.numericUpDownTimerInterval = new System.Windows.Forms.NumericUpDown();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.buttonSendMode = new System.Windows.Forms.Button();
             this.flowLayoutPanel1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownTimerInterval)).BeginInit();
@@ -69,6 +70,7 @@
             // 
             this.flowLayoutPanel1.Controls.Add(this.buttonSTART);
             this.flowLayoutPanel1.Controls.Add(this.buttonStop);
+            this.flowLayoutPanel1.Controls.Add(this.buttonSendMode);
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(114, 382);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
@@ -158,6 +160,16 @@
             0,
             0});
             // 
+            // buttonSendMode
+            // 
+            this.buttonSendMode.Location = new System.Drawing.Point(249, 3);
+            this.buttonSendMode.Name = "buttonSendMode";
+            this.buttonSendMode.Size = new System.Drawing.Size(75, 23);
+            this.buttonSendMode.TabIndex = 7;
+            this.buttonSendMode.Text = "Send Mode";
+            this.buttonSendMode.UseVisualStyleBackColor = true;
+            this.buttonSendMode.Click += new System.EventHandler(this.buttonSendMode_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -201,5 +213,6 @@
         private System.Windows.Forms.NumericUpDown numericUpDownTimerInterval;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Button buttonStop;
+        private System.Windows.Forms.Button buttonSendMode;
     }
 }
