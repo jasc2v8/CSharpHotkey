@@ -19,103 +19,103 @@ using CSharpHotkeyLib;
 
 namespace AutoWalk
 {
-	public partial class Form1 : Form
-	{
-		CSharpHotkey Win = new CSharpHotkey();
+    public partial class Form1 : Form
+    {
+        CSharpHotkey Win = new CSharpHotkey();
 
-		private string WinTitle = string.Empty;
+        private string WinTitle = string.Empty;
 
-		private HotKey hotkeySpace = null;
+        private HotKey hotkeySpace = null;
 
-		Keys WalkKey { get; set; }
-		Keys WalkKeyCurrent { get; set; }
+        Keys WalkKey { get; set; }
+        Keys WalkKeyCurrent { get; set; }
 
-		public Form1()
-		{
-			InitializeComponent();
+        public Form1()
+        {
+            InitializeComponent();
 
-			this.Text = Assembly.GetEntryAssembly().GetName().Name + " v" + Assembly.GetEntryAssembly().GetName().Version;
+            this.Text = Assembly.GetEntryAssembly().GetName().Name + " v" + Assembly.GetEntryAssembly().GetName().Version;
 
-			textBoxInput.Text = "notepad _class notepad";
+            textBoxInput.Text = "notepad _class notepad";
 
-		}
-		private void Form1_Load(object sender, EventArgs e)
-		{
-			//textBoxInput.Text = "Input...";
-			toolStripStatusLabel1.Text = "Ready.";
-		}
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            //textBoxInput.Text = "Input...";
+            toolStripStatusLabel1.Text = "Ready.";
+        }
 
-		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-		{
-			//MessageBox.Show("timer1=" + timer1.Enabled);
-		}
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            //MessageBox.Show("timer1=" + timer1.Enabled);
+        }
 
-		private void WriteLine(string text)
-		{
-			textBoxOutput.AppendText(text + Environment.NewLine);
-		}
-		private void buttonClear_Click(object sender, EventArgs e)
-		{
-			textBoxOutput.Clear();
-			//textBoxInput.Clear();
-			toolStripStatusLabel1.Text = "Ready.";
-		}
+        private void WriteLine(string text)
+        {
+            textBoxOutput.AppendText(text + Environment.NewLine);
+        }
+        private void buttonClear_Click(object sender, EventArgs e)
+        {
+            textBoxOutput.Clear();
+            //textBoxInput.Clear();
+            toolStripStatusLabel1.Text = "Ready.";
+        }
 
-		private void buttonSTART_Click(object sender, EventArgs e)
-		{
+        private void buttonSTART_Click(object sender, EventArgs e)
+        {
 
-			textBoxOutput.Focus();
+            textBoxOutput.Focus();
 
-			Win.SendMode(SendModeCommand.Input);
+            Win.SendMode(SendModeCommand.Input);
 
-			//WriteLine("IN 3 SECONDS...");
-			//Win.Sleep(3000);
+            //WriteLine("IN 3 SECONDS...");
+            //Win.Sleep(3000);
 
-			hotkeySpace = new HotKey(Keys.None, Keys.Space, (hotkey) =>
+            hotkeySpace = new HotKey(Keys.None, Keys.Space, (hotkey) =>
             {
 
-				if (!timer1.Enabled) //IsLooping
-				{
-					timer1.Start();
-				}
-				else
+                if (!timer1.Enabled) //IsLooping
                 {
-					timer1.Stop();
+                    timer1.Start();
+                }
+                else
+                {
+                    timer1.Stop();
                     Win.Send(WalkKey, Keys.Up);
-				}
-			});
+                }
+            });
 
             WalkKey = Keys.W;
 
-			timer1.Interval = (int)numericUpDownTimerInterval.Value; //recommend 33 minimum
-			timer1.Start();
+            timer1.Interval = (int)numericUpDownTimerInterval.Value; //recommend 33 minimum
+            timer1.Start();
 
-			numericUpDownTimerInterval.Enabled = false;
-			textBoxInput.Enabled = false;
+            numericUpDownTimerInterval.Enabled = false;
+            textBoxInput.Enabled = false;
 
-			WinTitle = textBoxInput.Text;
-			Win.SetTitleMatchMode(MatchMode.Contains, MatchCase.InSensitive);
+            WinTitle = textBoxInput.Text;
+            Win.SetTitleMatchMode(MatchMode.Contains, MatchCase.InSensitive);
 
-			//WriteLine("AutoWalk stared for WinTitle: " + WinTitle);
-			WriteLine("Press W, A, S, D to Auto Walk or SPACE to Start/Stop.");
+            //WriteLine("AutoWalk stared for WinTitle: " + WinTitle);
+            WriteLine("Press W, A, S, D to Auto Walk or SPACE to Start/Stop.");
 
-			toolStripStatusLabel1.Text = "AutoWalk STARTED.";
+            toolStripStatusLabel1.Text = "AutoWalk STARTED.";
 
-		}
+        }
         private void buttonStop_Click(object sender, EventArgs e)
         {
 
-			WriteLine("AutoWalk STOPPED.");
-			toolStripStatusLabel1.Text = "AutoWalk STOPPED.";
+            WriteLine("AutoWalk STOPPED.");
+            toolStripStatusLabel1.Text = "AutoWalk STOPPED.";
 
-			timer1.Stop();
-			timer1.Dispose();
-			Win.Send(WalkKeyCurrent, Keys.Up);
+            timer1.Stop();
+            timer1.Dispose();
+            Win.Send(WalkKeyCurrent, Keys.Up);
 
-			numericUpDownTimerInterval.Enabled = true;
-			textBoxInput.Enabled = true;
+            numericUpDownTimerInterval.Enabled = true;
+            textBoxInput.Enabled = true;
 
-		}
+        }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -125,15 +125,15 @@ namespace AutoWalk
             if (WalkKeyCurrent != Keys.S & Win.GetKeyState(Keys.S)) { WalkKey = Keys.S; }
 
             if (WalkKeyCurrent != WalkKey)
-			{
-				Win.Send(WalkKeyCurrent, Keys.Up);
+            {
+                Win.Send(WalkKeyCurrent, Keys.Up);
 
-				WalkKeyCurrent = WalkKey;
-				return;
-			}
+                WalkKeyCurrent = WalkKey;
+                return;
+            }
 
-			Win.Send(WalkKeyCurrent, Keys.Down);
-		}
+            Win.Send(WalkKeyCurrent, Keys.Down);
+        }
     }
 
 }
