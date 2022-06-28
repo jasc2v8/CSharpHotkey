@@ -1,16 +1,18 @@
 ﻿/*
- 
-    2022-06-21-0900 v0.0.9  SendMode(SendModeCommand.Event or SendModeCommand.Input), renamed UpDown to DownOrUp
-    2022-06-19-1650 v0.0.8  SendInput(Keys Key, Keys UpDown = Keys.None)
-    2022-06-19-1045 v0.0.7  Send(Keys Key, Keys UpDown = Keys.None), renamed Objects (ex: ObjMonitor to MonitorObj)
-    2022-06-18-1430 v0.0.6  Add Sending.Key so Send() doesn't trigger InputHook() or HotKey()
-    2022-06-18-0630 v0.0.5  Remove reference to PresentationCore, add MouseButton
-    2022-06-17-1500 v0.0.4  Change Struct to Enum for function parameters
-    2022-06-17-0500 v0.0.3  Add Send(Keys.Key), fix SetLockState()
-    2022-06-14-1620 v0.0.2 
+
+    2022-06-28-1215 v0.0.10 Fix Activate() and Restore(), global replace UpDown with DownOrUp
+    2022-06-21-0900 v0.0.09 SendMode(SendModeCommand.Event or SendModeCommand.Input), renamed DownOrUp to DownOrUp
+    2022-06-19-1650 v0.0.08 SendInput(Keys Key, Keys DownOrUp = Keys.None)
+    2022-06-19-1045 v0.0.07 Send(Keys Key, Keys DownOrUp = Keys.None), renamed Objects (ex: ObjMonitor to MonitorObj)
+    2022-06-18-1430 v0.0.06 Add Sending.Key so Send() doesn't trigger InputHook() or HotKey()
+    2022-06-18-0630 v0.0.05 Remove reference to PresentationCore, add MouseButton
+    2022-06-17-1500 v0.0.04 Change Struct to Enum for function parameters
+    2022-06-17-0500 v0.0.03 Add Send(Keys.Key), fix SetLockState()
+    2022-06-14-1620 v0.0.02 
     
     TODO:
       continue testing and development
+
         
     OVERVIEW:
       README at https://github.com/jasc2v8/CSharpHotkey
@@ -98,7 +100,9 @@ namespace CSharpHotkeyLib
     {
         StartsWith = 1,
         Contains = 2,
+        
         Exact = 3,
+    
         EndsWith = 4,
     }
     public enum MatchCase
@@ -198,8 +202,17 @@ namespace CSharpHotkeyLib
         #region Public Methods
         public bool Activate(string WinTitle = "")
         {
-            return Restore(WinTitle);
+            bool result1 = false;
+            bool result2 = false;
+
+            if (Get(GetCommand.Minimize, WinTitle) == "1")
+                result1 = Win32.ShowWindow(GetID(WinTitle), Win32.SW_RESTORE);
+
+            result2 = Win32.SetForegroundWindow(GetID(WinTitle));
+            DoDelay(WinDelay);
+            return result1 | result2;
         }
+
         public void ActivateBottom_UNIMPLEMENTED()
         {
             //rarely used
@@ -211,6 +224,7 @@ namespace CSharpHotkeyLib
 
             return false;
         }
+        
         public bool BlockInput(bool Flag)
         {
             //BlockInput may only work if the script has been run as administrator.
@@ -219,6 +233,7 @@ namespace CSharpHotkeyLib
         public void Click(MouseButton mb = MouseButton.Left, Point MousePoint = default)
         {
             Click(mb, MousePoint.X, MousePoint.Y);
+
         }
         public void Click(MouseButton mb = MouseButton.Left, int x = -1, int y = -1)
         {
@@ -688,6 +703,7 @@ namespace CSharpHotkeyLib
         {
             //modern desktop apps don't use controls
         }
+        
         public string GetTitle(string WinTitle = "")
         {
             string windowTitle = String.Empty;
@@ -983,14 +999,14 @@ namespace CSharpHotkeyLib
         {
             //use InputHook class instead
         }
-        public bool KeyWait(Keys Key, Keys UpDown, double TimeoutSeconds)
+        public bool KeyWait(Keys Key, Keys DownOrUp, double TimeoutSeconds)
         {
             //Key               Keys.A to Keys.Zoom
-            //UpDown            Keys.Up or Keys.Down
+            //DownOrUp            Keys.Up or Keys.Down
             //TimeoutSeconds    0 = no wait, -1 = indefinite. T or t case insensitive
 
-            if (UpDown != Keys.Up & UpDown != Keys.Down)
-                UpDown = Keys.Down;
+            if (DownOrUp != Keys.Up & DownOrUp != Keys.Down)
+                DownOrUp = Keys.Down;
 
             if (TimeoutSeconds < 0) { TimeoutSeconds = Int32.MaxValue; }
 
@@ -1005,10 +1021,10 @@ namespace CSharpHotkeyLib
 
                 short x = Win32.GetAsyncKeyState(Key); //must be Async
 
-                if ((UpDown == Keys.Down) && (x & MSB) == MSB)
+                if ((DownOrUp == Keys.Down) && (x & MSB) == MSB)
                     return false;   //no timeout
 
-                if ((UpDown == Keys.Up) && (x & MSB) == 0)
+                if ((DownOrUp == Keys.Up) && (x & MSB) == 0)
                     return false;   //no timeout
             }
             return true; //timeout
@@ -1021,7 +1037,7 @@ namespace CSharpHotkeyLib
             //  Tn    =  TimeoutSeconds: 0 = no wait, -1 = indefinite. T or t case insensitive
             //  Empty =  wait indefinitely for the specified key or mouse/joystick button to be physically released by the user.
 
-            string KeyUpDown = "U";
+            string KeyDownOrUp = "U";
             int TimeoutSeconds = -1;
 
             const uint LSB = 1 << 0;    // least significant bit = 1
@@ -1030,7 +1046,7 @@ namespace CSharpHotkeyLib
             Options = Options.ToUpper();
 
             if (Options.Contains("D"))
-                KeyUpDown = "D";
+                KeyDownOrUp = "D";
 
             if (Options.Contains("T"))
             {
@@ -1049,10 +1065,10 @@ namespace CSharpHotkeyLib
 
                 short x = Win32.GetAsyncKeyState(Key); //must be Async
 
-                if ((KeyUpDown == "D") && (x & MSB) == MSB)
+                if ((KeyDownOrUp == "D") && (x & MSB) == MSB)
                     return false;   //no timeout
 
-                if ((KeyUpDown == "U") && (x & MSB) == 0)
+                if ((KeyDownOrUp == "U") && (x & MSB) == 0)
                     return false;   //no timeout
             }
             return true; //timeout
@@ -1095,7 +1111,24 @@ namespace CSharpHotkeyLib
         }
         public bool Minimize(string WinTitle = "")
         {
-            bool result = Win32.ShowWindow(GetID(WinTitle), Win32.SW_MINIMIZE);
+
+
+            //public const int SC_SIZE = 0xF000;
+            //public const int SC_MOVE = 0xF010;
+            //public const int SC_MINIMIZE = 0xF020;
+            //public const int SC_MAXIMIZE = 0xF030;
+            //public const int SC_CLOSE = 0xF060;
+            //public const int SC_RESTORE = 0xF120;
+
+
+            //PostMessage(hWnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+
+            int SC_MINIMIZE = 0xF020;
+
+            bool result = Win32.PostMessageA(GetID(WinTitle), Win32.WM_SYSCOMMAND, SC_MINIMIZE, 0);
+
+
+            //bool result = Win32.ShowWindow(GetID(WinTitle), Win32.SW_MINIMIZE);
             DoDelay(WinDelay);
             return result;
         }
@@ -1281,8 +1314,10 @@ namespace CSharpHotkeyLib
                     break;
             }
             SearchBmp.UnlockBits(sBmd);
+            
             return result;
         }
+        
         public bool Restore(string WinTitle = "")
         {
             bool result1 = Win32.ShowWindow(GetID(WinTitle), Win32.SW_RESTORE);
@@ -1320,7 +1355,7 @@ namespace CSharpHotkeyLib
             }
             DoDelay(KeyDelay);
         }
-        public void SendInput(Keys Key, Keys UpDown = Keys.None)
+        public void SendInput(Keys Key, Keys DownOrUp = Keys.None)
         {
             void _KeyDown(ushort VKey)
             {
@@ -1350,11 +1385,11 @@ namespace CSharpHotkeyLib
 
             Sending.Key = Key; //signal InputHook() and HotKey() to ignore this Key
 
-            if (UpDown == Keys.Down)
+            if (DownOrUp == Keys.Down)
             {
                 _KeyDown((ushort)Key);
             }
-            else if (UpDown == Keys.Up)
+            else if (DownOrUp == Keys.Up)
             {
                 _KeyUp((ushort)Key);
             }
@@ -1550,12 +1585,12 @@ namespace CSharpHotkeyLib
             DoDelay(WinDelay);
             return result;
         }
-        public void SetLockState(Keys Key, Keys UpDown)
+        public void SetLockState(Keys Key, Keys DownOrUp)
         {
             if (Key != Keys.CapsLock & Key != Keys.Scroll & Key != Keys.NumLock & Key != Keys.Insert)
                 return;
 
-            if (UpDown == Keys.Down && Control.IsKeyLocked(Key) || (UpDown != Keys.Down && !Control.IsKeyLocked(Key)))
+            if (DownOrUp == Keys.Down && Control.IsKeyLocked(Key) || (DownOrUp != Keys.Down && !Control.IsKeyLocked(Key)))
                 return;
 
             Send(Key);
@@ -1915,8 +1950,13 @@ namespace CSharpHotkeyLib
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, uint dwExtraInf);
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern uint MapVirtualKey(uint uCode, uint uMapType); 
-            [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern IntPtr OpenProcess(uint processAccess, bool bInheritHandle, int processId); 
-            [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)][return: MarshalAs(UnmanagedType.Bool)] public static extern bool PostMessage(HandleRef hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+            [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern IntPtr OpenProcess(uint processAccess, bool bInheritHandle, int processId);
+            [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)][return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool PostMessage(HandleRef hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+            [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)][return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool PostMessageA(IntPtr hWnd, uint Msg, int wParam, int lParam);
+
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)][return: MarshalAs(UnmanagedType.Bool)] public static extern bool SetCursorPos(int x, int y);
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)][return: MarshalAs(UnmanagedType.Bool)] public static extern bool SetForegroundWindow(IntPtr hWnd);
             [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize); 
@@ -2495,7 +2535,7 @@ namespace CSharpHotkeyLib
         #region Private Properties
         private Keys RegisteredModifiers { get; set; }
         private Keys RegisteredKey { get; set; }
-        private Keys RegisteredKeyUpDown { get; set; }
+        private Keys RegisteredKeyDownOrUp { get; set; }
         private Keys RegisteredSupressYN { get; set; }
         private int RegisteredMouseButton { get; set; }
         private int RegisteredMouseWheel { get; set; }
@@ -2514,38 +2554,38 @@ namespace CSharpHotkeyLib
         #endregion Private Properties
 
         #region Constructors
-        public InputHook(Keys Modifiers, Keys Key, Keys UpDown, Keys SupressYN, Action<InputHook> OnKeyAction = null)
+        public InputHook(Keys Modifiers, Keys Key, Keys DownOrUp, Keys SupressYN, Action<InputHook> OnKeyAction = null)
         {
             //Keys Modifiers    Alt, Control, None, Shift, LWin, RWin, or combination example: Keys.Alt | Keys.Control
             //Keys Key (kybd)   Keys.A through Keys.Zoom
             //Keys Key (mouse)  Keys.LButton, Keys.MButton, Keys.RButton, Keys.XButton1, Keys.XButton2
-            //Keys UpDown       Keys.Up, Keys,Down
+            //Keys DownOrUp     Keys.Up, Keys,Down
             //Keys SupressYN    Keys.Y, Keys.N
             //Action            OnKeyAction
             //
             //Note: Send(Keys Key) will NOT trigger InputHook() or HotKey(), but Send(string Keystrokes) will.
 
-            if (UpDown != Keys.Up & UpDown != Keys.Down)
-                UpDown = Keys.Down;
+            if (DownOrUp != Keys.Up & DownOrUp != Keys.Down)
+                DownOrUp = Keys.Down;
 
             if (SupressYN != Keys.Y & SupressYN != Keys.N)
                 SupressYN = Keys.N;
 
             if (MouseButtonsList.Contains(Key))
             {
-                if (Key == Keys.LButton & UpDown == Keys.Down) RegisteredMouseButton = WM_LBUTTONDOWN;
-                else if (Key == Keys.LButton & UpDown == Keys.Up) RegisteredMouseButton = WM_LBUTTONUP;
-                else if (Key == Keys.MButton & UpDown == Keys.Down) RegisteredMouseButton = WM_MBUTTONDOWN;
-                else if (Key == Keys.MButton & UpDown == Keys.Up) RegisteredMouseButton = WM_MBUTTONUP;
-                else if (Key == Keys.RButton & UpDown == Keys.Down) RegisteredMouseButton = WM_RBUTTONDOWN;
-                else if (Key == Keys.RButton & UpDown == Keys.Up) RegisteredMouseButton = WM_RBUTTONUP;
-                else if (Key == Keys.XButton1 & UpDown == Keys.Down) RegisteredMouseButton = WM_XBUTTONDOWN;
-                else if (Key == Keys.XButton1 & UpDown == Keys.Up) RegisteredMouseButton = WM_XBUTTONUP;
-                else if (Key == Keys.XButton2 & UpDown == Keys.Down) RegisteredMouseButton = WM_XBUTTONDOWN;
-                else if (Key == Keys.XButton2 & UpDown == Keys.Up) RegisteredMouseButton = WM_XBUTTONUP;
+                if (Key == Keys.LButton & DownOrUp == Keys.Down) RegisteredMouseButton = WM_LBUTTONDOWN;
+                else if (Key == Keys.LButton & DownOrUp == Keys.Up) RegisteredMouseButton = WM_LBUTTONUP;
+                else if (Key == Keys.MButton & DownOrUp == Keys.Down) RegisteredMouseButton = WM_MBUTTONDOWN;
+                else if (Key == Keys.MButton & DownOrUp == Keys.Up) RegisteredMouseButton = WM_MBUTTONUP;
+                else if (Key == Keys.RButton & DownOrUp == Keys.Down) RegisteredMouseButton = WM_RBUTTONDOWN;
+                else if (Key == Keys.RButton & DownOrUp == Keys.Up) RegisteredMouseButton = WM_RBUTTONUP;
+                else if (Key == Keys.XButton1 & DownOrUp == Keys.Down) RegisteredMouseButton = WM_XBUTTONDOWN;
+                else if (Key == Keys.XButton1 & DownOrUp == Keys.Up) RegisteredMouseButton = WM_XBUTTONUP;
+                else if (Key == Keys.XButton2 & DownOrUp == Keys.Down) RegisteredMouseButton = WM_XBUTTONDOWN;
+                else if (Key == Keys.XButton2 & DownOrUp == Keys.Up) RegisteredMouseButton = WM_XBUTTONUP;
 
                 RegisteredModifiers = Modifiers;
-                RegisteredKeyUpDown = UpDown;
+                RegisteredKeyDownOrUp = DownOrUp;
                 RegisteredSupressYN = SupressYN;
                 keyAction += OnKeyAction;
                 SetHook(WH_MOUSE_LL);
@@ -2554,7 +2594,7 @@ namespace CSharpHotkeyLib
             {
                 RegisteredModifiers = Modifiers;
                 RegisteredKey = Key;
-                RegisteredKeyUpDown = UpDown;
+                RegisteredKeyDownOrUp = DownOrUp;
                 RegisteredSupressYN = SupressYN;
                 keyAction += OnKeyAction;
                 SetHook(WH_KEYBOARD_LL);
@@ -2608,12 +2648,12 @@ namespace CSharpHotkeyLib
                 {
                     int iwParam = wParam.ToInt32();
 
-                    if ((iwParam == WM_KEYDOWN || iwParam == WM_SYSKEYDOWN) & RegisteredKeyUpDown == Keys.Down)
+                    if ((iwParam == WM_KEYDOWN || iwParam == WM_SYSKEYDOWN) & RegisteredKeyDownOrUp == Keys.Down)
                     {
                         if (ProcessKeyboard(iwParam, wParam, lParam))
                             return (IntPtr)1;
                     }
-                    else if ((iwParam == WM_KEYUP || iwParam == WM_SYSKEYUP) & RegisteredKeyUpDown == Keys.Up)
+                    else if ((iwParam == WM_KEYUP || iwParam == WM_SYSKEYUP) & RegisteredKeyDownOrUp == Keys.Up)
                     {
 
                         if (ProcessKeyboard(iwParam, wParam, lParam))
