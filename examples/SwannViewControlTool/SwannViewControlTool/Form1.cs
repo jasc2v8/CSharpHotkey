@@ -82,15 +82,19 @@ namespace SwannViewControlTool
 
             Win.WaitClose(MYDVR_WINDOW_TITLE);
 
-            if (Win.Wait(LOGIN_WINDOW_TITLE, 15))
-            {
-                //If timeout, user pressed X to close window so do nothing
-                return;
-            }
 
-            //if no timeout, user pressed logout so close the login window
-            Win.Sleep(250);
-            Win.Click(MouseButton.Left, 1280, 740);
+            //don't wait for the login window as it's not reliable
+            return;
+
+            //if (Win.Wait(LOGIN_WINDOW_TITLE, 15))
+            //{
+            //    //If timeout, user pressed X to close window so do nothing
+            //    return;
+            //}
+
+            ////if no timeout, user pressed logout so close the login window
+            //Win.Sleep(250);
+            //Win.Click(MouseButton.Left, 1280, 740);
         }
     }
 }
